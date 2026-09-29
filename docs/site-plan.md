@@ -1,6 +1,6 @@
 # BorrowX by Monark: site plan
 
-Status: planned, then built on `develop`. This plan is kept in sync with what ships.
+Status: shipped on `develop`. This plan describes what the site does and is kept in sync with the code (see "Decisions made while building" at the end).
 
 - Product: **BorrowX**, the borrower's side of the Monark DeFi family.
 - Authoritative description: https://www.monark.io/en/project/defi-borrow
@@ -176,7 +176,7 @@ The full microcopy lives in `src/i18n/dictionaries/en.ts` and `fr.ts`; the secti
 | Validation | Enter an amount. · That's more than your wallet holds. · That's above the {pct} limit for {token}: lock more or borrow less. · You need {amount} more tUSDC. Get test tokens | Saisissez un montant. · C'est plus que ce que contient votre portefeuille. · C'est au-delà de la limite de {pct} pour le {token} : bloquez plus ou empruntez moins. · Il vous manque {amount} tUSDC. Obtenir des jetons de test |
 | History empty | Loans you close will appear here. | Les prêts que vous fermez apparaîtront ici. |
 | Storage error | Your browser is blocking storage, so the demo will reset when you leave the page. | Votre navigateur bloque le stockage : la démo sera réinitialisée quand vous quitterez la page. |
-| Controls | Demo controls · Slow network · Fail the next transaction · Get 500 test tUSDC · Reset demo (Start over with the example wallet? Your loan and history will be cleared.) | Contrôles de la démo · Réseau lent · Faire échouer la prochaine transaction · Obtenir 500 tUSDC de test · Réinitialiser la démo (Recommencer avec le portefeuille d'exemple ? Votre prêt et votre historique seront effacés.) |
+| Controls | Demo controls · Slow network · Fail the next transaction · Get test stablecoins (500 tUSDC and 500 tDAI) · Reset demo (Start over with the example wallet? Your loan, history and market changes will be cleared.) | Contrôles de la démo · Réseau lent · Faire échouer la prochaine transaction · Obtenir des stablecoins de test (500 tUSDC et 500 tDAI) · Réinitialiser la démo (Recommencer avec le portefeuille d'exemple ? Votre prêt, votre historique et vos changements de marché seront effacés.) |
 
 ### How it works
 
@@ -228,3 +228,14 @@ Icons: `lucide-react` only (1.75px stroke). Diagrams built in code: safety runwa
 - No partial liquidations: a liquidation closes the loan in one step (explained as a simplification on `/how-it-works`).
 - No real credit scoring or identity: borrower levels are a simulation from the demo's own history.
 - No accounts, email or notifications; state lives in this browser only.
+
+## Decisions made while building
+
+- **Amounts are not monospace.** The guidelines reserve monospace for addresses, hashes and code, so amounts (including the registry `token-amount`) use Nunito Sans with tabular figures.
+- **Stored amounts are 6-decimal numbers**, converted to base units only for `token-amount`. Suggested amounts are rounded up to each token's display precision (tETH 4 decimals) so they read cleanly.
+- **The amount owed shows 6 decimals** so interest visibly ticks every second (at 5% on 2,000 tUSDC it moves about 0.000003 per second).
+- **Adding collateral uses the same two-transaction pattern** as opening a loan (allowance, then add), and allowances are logged in the loan activity.
+- **Market panel:** a slider (30% to 130% of the reference price) plus -10% / -25% / -40% presets and a reset. Enforcement is checked when the slider rests (keyboard changes included), not on every pixel, so dragging through the red zone and back doesn't liquidate.
+- **Liquidation is automatic but visible:** a keeper job shows a pending transaction with its hash for a block or two before the loan closes; actions are disabled meanwhile.
+- **Toasts** sit top-right below the header and app strip (desktop) and full width below the header (mobile), so they never cover the amount owed or the runway they report on, nor the demo controls.
+- **One route for the loan** (`/app`) plus `/app/borrow`; a loan that is repaid or liquidated stays on `/app` until the visitor withdraws collateral and starts a new one.

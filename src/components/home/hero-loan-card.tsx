@@ -66,15 +66,15 @@ export function HeroLoanCard({
       <dl className="mt-5 grid grid-cols-3 gap-3 border-y py-4 text-sm">
         <div>
           <dt className="text-xs text-muted-foreground">{copy.borrowed}</dt>
-          <dd className="mt-0.5 font-mono font-bold">{formatNumber(DEBT, locale)} <span className="font-sans text-xs text-muted-foreground">tUSDC</span></dd>
+          <dd className="mt-0.5 tabular-nums font-bold">{formatNumber(DEBT, locale)} <span className="font-sans text-xs text-muted-foreground">tUSDC</span></dd>
         </div>
         <div>
           <dt className="text-xs text-muted-foreground">{copy.locked}</dt>
-          <dd className="mt-0.5 font-mono font-bold">{formatNumber(COLLATERAL, locale, 1)} <span className="font-sans text-xs text-muted-foreground">tETH</span></dd>
+          <dd className="mt-0.5 tabular-nums font-bold">{formatNumber(COLLATERAL, locale, 1)} <span className="font-sans text-xs text-muted-foreground">tETH</span></dd>
         </div>
         <div>
           <dt className="text-xs text-muted-foreground">{healthLabel}</dt>
-          <dd className="mt-0.5 font-mono font-bold tabular-nums">{formatHealth(health, locale)}</dd>
+          <dd className="mt-0.5 tabular-nums font-bold ">{formatHealth(health, locale)}</dd>
         </div>
       </dl>
 

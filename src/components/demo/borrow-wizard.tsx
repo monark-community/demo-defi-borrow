@@ -16,7 +16,6 @@ import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import {
   borrowerLevel,
-  ceil6,
   collateralFor,
   healthFactor,
   levelDiscount,
@@ -30,7 +29,7 @@ import { approveCollateral, openLoan } from "@/lib/demo/ops"
 import { useDemo, useDemoNow } from "@/lib/demo/store"
 import { COLLATERALS, COLLATERAL_PARAMS, DAY_MS, LOAN_TOKENS, SUGGESTED_HEALTH, TERMS, parseAmount } from "@/lib/demo/tokens"
 import type { CollateralSymbol, LoanSymbol, RateKind, TermDays } from "@/lib/demo/types"
-import { formatApr, formatDate, formatHealth, formatNumber, formatPercent, formatToken, formatUsd } from "@/lib/format"
+import { ceilDisplay, formatApr, formatDate, formatHealth, formatNumber, formatPercent, formatToken, formatUsd } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
@@ -91,8 +90,8 @@ export function BorrowWizard() {
   const collUsd = (collateral ?? 0) * collPrice
   const liqPrice = amount && collateral ? liquidationPrice(debtUsd, collateral, params.liquidationThreshold) : Number.POSITIVE_INFINITY
   const health = amount && collateral ? healthFactor(collUsd, params.liquidationThreshold, debtUsd) : Number.POSITIVE_INFINITY
-  const suggested = amount ? ceil6(collateralFor(debtUsd, collateralSymbol, demo.market, SUGGESTED_HEALTH)) : 0
-  const minForLimit = amount ? ceil6(debtUsd / (maxLtv * collPrice)) : 0
+  const suggested = amount ? ceilDisplay(collateralFor(debtUsd, collateralSymbol, demo.market, SUGGESTED_HEALTH), collateralSymbol) : 0
+  const minForLimit = amount ? ceilDisplay(debtUsd / (maxLtv * collPrice), collateralSymbol) : 0
 
   const amountError =
     amount === null || amount <= 0
@@ -111,7 +110,7 @@ export function BorrowWizard() {
           ? t(b.errors.overLimit, {
               pct: formatPercent(maxLtv, locale),
               token: collateralSymbol,
-              min: formatToken(minForLimit, collateralSymbol, locale, 6),
+              min: formatToken(minForLimit, collateralSymbol, locale),
             })
           : null
 
@@ -304,7 +303,7 @@ export function BorrowWizard() {
                     onClick={() => setCollateralText(String(suggested))}
                   >
                     <SparklesIcon aria-hidden="true" />
-                    {t(b.lock.suggest, { amount: formatToken(suggested, collateralSymbol, locale, 6) })}
+                    {t(b.lock.suggest, { amount: formatToken(suggested, collateralSymbol, locale) })}
                   </Button>
                   <p className="mt-1.5 text-xs text-muted-foreground">{b.lock.suggestHint}</p>
                 </div>
@@ -336,7 +335,7 @@ export function BorrowWizard() {
                     <Choice key={k} checked={rateKind === k} onSelect={() => setRateKind(k)}>
                       <span className="flex items-baseline justify-between gap-2">
                         <span className="text-base font-extrabold">{k === "fixed" ? terms.fixed : terms.variable}</span>
-                        <span className="font-mono text-sm font-bold">{formatApr(quoteApr(borrowSymbol, k, demo.market, discount), locale)}</span>
+                        <span className="tabular-nums text-sm font-bold">{formatApr(quoteApr(borrowSymbol, k, demo.market, discount), locale)}</span>
                       </span>
                       <span className="text-xs text-muted-foreground">{k === "fixed" ? b.terms.fixedHint : b.terms.variableHint}</span>
                     </Choice>
@@ -351,11 +350,11 @@ export function BorrowWizard() {
               <dl className="mt-6 divide-y rounded-2xl border text-sm">
                 <div className="flex items-center justify-between gap-4 px-4 py-3">
                   <dt className="text-muted-foreground">{b.terms.interest}</dt>
-                  <dd className="font-mono font-semibold">{formatToken(interest, borrowSymbol, locale)}</dd>
+                  <dd className="tabular-nums font-semibold">{formatToken(interest, borrowSymbol, locale)}</dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 px-4 py-3">
                   <dt className="text-muted-foreground">{t(b.terms.total, { date: formatDate(dueAt, locale) })}</dt>
-                  <dd className="font-mono font-bold">{totalLabel}</dd>
+                  <dd className="tabular-nums font-bold">{totalLabel}</dd>
                 </div>
               </dl>
             </div>
@@ -369,7 +368,7 @@ export function BorrowWizard() {
               {done ? (
                 <div className="mt-4 flex flex-col items-start gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="bx-drop rounded-full border-2 border-primary px-3 py-1 font-mono text-sm font-bold">{collLabel}</span>
+                    <span className="bx-drop rounded-full border-2 border-primary px-3 py-1 tabular-nums text-sm font-bold">{collLabel}</span>
                     <Padlock locked className="h-16 w-14" />
                   </div>
                   <p className="text-muted-foreground">{t(b.review.doneBody, { amount: amountLabel, collateral: collLabel })}</p>
@@ -415,7 +414,7 @@ export function BorrowWizard() {
                   />
                   {openTx.state.phase === "pending" ? (
                     <div className="mt-4 flex items-center gap-4" aria-hidden="true">
-                      <span className="bx-drop rounded-full border-2 border-primary px-3 py-1 font-mono text-sm font-bold">{collLabel}</span>
+                      <span className="bx-drop rounded-full border-2 border-primary px-3 py-1 tabular-nums text-sm font-bold">{collLabel}</span>
                       <Padlock locked={false} className="h-14 w-12" />
                     </div>
                   ) : null}
@@ -546,7 +545,7 @@ function AmountField({
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={!!error}
           aria-describedby={`${id}-hint ${id}-error`}
-          className="h-14 pr-24 font-mono text-xl"
+          className="h-14 pr-24 tabular-nums text-xl"
         />
         <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-bold text-muted-foreground">{symbol}</span>
       </div>

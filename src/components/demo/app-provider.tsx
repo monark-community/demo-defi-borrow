@@ -41,12 +41,13 @@ export function AppProvider({ value, children }: { value: AppCopy; children: Rea
       <WalletPrompt />
       <Toaster
         theme={resolvedTheme === "dark" ? "dark" : "light"}
-        // Top-right, just under the sticky 64px header and the app strip:
+        // Top-right, below the sticky header and the app strip (so the demo
+        // controls stay reachable):
         // page titles are left-aligned, so that corner never holds the
         // loan figures a toast reports on. On phones sonner goes full width
         // below the header, above the page title rather than the numbers.
         position="top-right"
-        offset={{ top: 80, right: 24 }}
+        offset={{ top: 136, right: 24 }}
         mobileOffset={{ top: 72, left: 16, right: 16 }}
         toastOptions={{
           classNames: {

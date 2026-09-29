@@ -16,7 +16,16 @@ export function formatNumber(n: number, locale: Locale, maxFrac = 2, minFrac = 0
 
 /** "1,234.56 tUSDC" / "1 234,56 tUSDC". */
 export function formatToken(amount: number, symbol: TokenSymbol, locale: Locale, maxFrac = DISPLAY_DECIMALS[symbol]): string {
-  return `${formatNumber(amount, locale, maxFrac)} ${symbol}`
+  // Stablecoins read like money: whole amounts stay whole, anything else shows cents.
+  const stable = symbol === "tUSDC" || symbol === "tDAI"
+  const minFrac = stable && Math.abs(amount - Math.round(amount)) > 0.0000005 ? Math.min(2, maxFrac) : 0
+  return `${formatNumber(amount, locale, maxFrac, minFrac)} ${symbol}`
+}
+
+/** Round up to the token's display precision (suggested amounts should be easy to read). */
+export function ceilDisplay(amount: number, symbol: TokenSymbol): number {
+  const f = 10 ** DISPLAY_DECIMALS[symbol]
+  return Math.ceil(amount * f - 1e-9) / f
 }
 
 export function formatUsd(amount: number, locale: Locale, frac = 2): string {

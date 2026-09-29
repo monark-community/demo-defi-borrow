@@ -62,7 +62,7 @@ export function WalletPrompt() {
           {!prompt?.summary.noFee ? (
             <div className="flex items-center justify-between gap-4 px-4 py-2.5">
               <dt className="text-muted-foreground">{p.fee}</dt>
-              <dd className="font-mono text-xs">{feeText}</dd>
+              <dd className="tabular-nums text-xs">{feeText}</dd>
             </div>
           ) : null}
         </dl>

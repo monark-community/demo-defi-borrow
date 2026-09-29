@@ -15,7 +15,7 @@ import { addCollateral, approveCollateral } from "@/lib/demo/ops"
 import { useDemo, useDemoNow } from "@/lib/demo/store"
 import { COLLATERAL_PARAMS, RESCUE_HEALTH, SAFE_HEALTH, parseAmount } from "@/lib/demo/tokens"
 import type { Loan } from "@/lib/demo/types"
-import { formatHealth, formatToken, formatUsd } from "@/lib/format"
+import { ceilDisplay, formatHealth, formatToken, formatUsd } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
 import { Disclaimer } from "./disclaimer"
@@ -39,7 +39,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
   const parsed = parseAmount(text)
   const pos = positionOf(loan, demo.market, now)
   const { liquidationThreshold } = COLLATERAL_PARAMS[sym]
-  const rescue = pos.health < SAFE_HEALTH ? rescueOptions(loan, demo.market, now, RESCUE_HEALTH).addCollateral : 0
+  const rescue = pos.health < SAFE_HEALTH ? ceilDisplay(rescueOptions(loan, demo.market, now, RESCUE_HEALTH).addCollateral, sym) : 0
 
   let error: string | null = null
   if (parsed === null || parsed <= 0) error = a.errors.empty
@@ -132,7 +132,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
               onBlur={() => setTouched(true)}
               aria-invalid={touched && !!error}
               aria-describedby="add-hint add-error"
-              className="h-12 pr-20 font-mono text-lg"
+              className="h-12 pr-20 tabular-nums text-lg"
             />
             <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-semibold text-muted-foreground">{sym}</span>
           </div>
@@ -147,7 +147,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
               disabled={busy || rescue > balance}
               onClick={() => setText(String(rescue))}
             >
-              {t(a.suggested, { amount: formatToken(rescue, sym, locale, 6) })}
+              {t(a.suggested, { amount: formatToken(rescue, sym, locale) })}
             </Button>
           ) : null}
           <p id="add-error" role={touched && error ? "alert" : undefined} className="min-h-5 text-sm text-destructive">
@@ -158,12 +158,12 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
         {!error ? (
           <dl className="divide-y rounded-2xl border text-sm">
             <Row label={a.newHealth}>
-              <span className="font-mono">
+              <span className="tabular-nums">
                 {formatHealth(pos.health, locale)} → {formatHealth(healthAfter, locale)}
               </span>
             </Row>
             <Row label={a.newLiq}>
-              <span className="font-mono">
+              <span className="tabular-nums">
                 {formatUsd(pos.liqPrice, locale)} → {formatUsd(liqAfter, locale)}
               </span>
             </Row>

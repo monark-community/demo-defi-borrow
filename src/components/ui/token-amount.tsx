@@ -74,7 +74,7 @@ function TokenAmount({
       className={cn("inline-flex flex-col leading-tight", className)}
       {...props}
     >
-      <span className="inline-flex items-baseline gap-1 font-mono tabular-nums">
+      <span className="inline-flex items-baseline gap-1 tabular-nums">
         <span>{formatted}</span>
         {symbol && (
           <span className="text-muted-foreground text-[0.85em] font-sans">

@@ -75,7 +75,7 @@ export function SafetyRunway({
           style={{ left: `${pos}%` }}
         >
           <span className="text-[0.7rem] font-semibold text-muted-foreground">{labels.today}</span>
-          <span className="font-mono text-sm font-bold tabular-nums">{priceText}</span>
+          <span className="tabular-nums text-sm font-bold ">{priceText}</span>
         </div>
       </div>
       <div className="relative h-3.5 rounded-full bg-muted" aria-hidden="true">
@@ -105,12 +105,12 @@ export function SafetyRunway({
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-destructive" aria-hidden="true" />
             <dt className="text-muted-foreground">{labels.liquidation}</dt>
-            <dd className="font-mono font-semibold tabular-nums">{formatUsd(liqPrice, locale)}</dd>
+            <dd className="tabular-nums font-semibold ">{formatUsd(liqPrice, locale)}</dd>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-warning" aria-hidden="true" />
             <dt className="text-muted-foreground">{labels.atRisk}</dt>
-            <dd className="font-mono font-semibold tabular-nums">{formatUsd(atRisk, locale)}</dd>
+            <dd className="tabular-nums font-semibold ">{formatUsd(atRisk, locale)}</dd>
           </div>
         </dl>
       ) : null}

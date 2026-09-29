@@ -117,8 +117,8 @@ function OweCard({ loan }: { loan: Loan }) {
           {t(o.due, { date: formatDate(loan.dueAt, locale) })} · {dueText}
         </p>
       </div>
-      <p className="mt-3 flex flex-wrap items-baseline gap-x-2 font-mono text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
-        <span>{formatNumber(pos.owed, locale, 4, 4)}</span>
+      <p className="mt-3 flex flex-wrap items-baseline gap-x-2 tabular-nums text-4xl font-bold tracking-tight  sm:text-5xl">
+        <span>{formatNumber(pos.owed, locale, 6, 6)}</span>
         <span className="font-sans text-xl font-bold text-muted-foreground">{loan.borrowSymbol}</span>
       </p>
       <p className="mt-2 inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -135,7 +135,7 @@ function OweCard({ loan }: { loan: Loan }) {
         <div>
           <dt className="text-muted-foreground">{o.interest}</dt>
           <dd className="mt-1 font-semibold">
-            <Amount value={interest} symbol={loan.borrowSymbol} digits={4} />
+            <Amount value={interest} symbol={loan.borrowSymbol} digits={6} />
           </dd>
         </div>
       </dl>
@@ -168,7 +168,7 @@ function HealthCard({ loan }: { loan: Loan }) {
         <RiskBadge risk={pos.risk} label={terms.risk[pos.risk]} />
       </div>
       <p className="mt-3 flex items-baseline gap-2">
-        <span className="font-mono text-4xl font-bold tabular-nums">{formatHealth(pos.health, locale)}</span>
+        <span className="tabular-nums text-4xl font-bold ">{formatHealth(pos.health, locale)}</span>
         <span className="text-sm text-muted-foreground">{terms.health}</span>
       </p>
       <SafetyRunway

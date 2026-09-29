@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { FastForwardIcon, RotateCcwIcon, TrendingDownIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ export function MarketPanel({ loan }: { loan: Loan }) {
   const now = useDemoNow(1000)
   const { app, locale } = useAppCopy()
   const m = app.market
+  const settle = useRef<number | undefined>(undefined)
   if (!demo) return null
   const symbol = loan.collateralSymbol
   const ref = TOKENS[symbol].usd
@@ -43,7 +45,7 @@ export function MarketPanel({ loan }: { loan: Loan }) {
           <Label htmlFor="price-slider" className="text-sm font-bold">
             {t(m.price, { token: symbol })}
           </Label>
-          <output htmlFor="price-slider" className="font-mono text-lg font-bold tabular-nums">
+          <output htmlFor="price-slider" className="tabular-nums text-lg font-bold ">
             {formatUsd(price, locale)}
           </output>
         </div>
@@ -57,8 +59,17 @@ export function MarketPanel({ loan }: { loan: Loan }) {
           disabled={busy}
           aria-label={t(m.price, { token: symbol })}
           aria-valuetext={formatUsd(price, locale)}
-          onValueChange={([v]) => v !== undefined && setPrice(symbol, v, false)}
-          onValueCommit={() => checkTerms()}
+          onValueChange={([v]) => {
+            if (v === undefined) return
+            setPrice(symbol, v, false)
+            // Keyboard changes don't always "commit", so settle the terms once the value rests.
+            window.clearTimeout(settle.current)
+            settle.current = window.setTimeout(checkTerms, 450)
+          }}
+          onValueCommit={() => {
+            window.clearTimeout(settle.current)
+            checkTerms()
+          }}
         />
         <p className="mt-1 text-xs text-muted-foreground">{t(m.reference, { price: formatUsd(ref, locale) })}</p>
         <div role="group" aria-label={m.presets} className="mt-3 flex flex-wrap gap-2">

@@ -100,9 +100,9 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
                     <th scope="row" className="px-4 py-3 font-bold">
                       {sym}
                     </th>
-                    <td className="px-4 py-3 font-mono">{formatUsd(TOKENS[sym].usd, locale)}</td>
-                    <td className="px-4 py-3 font-mono">{formatPercent(COLLATERAL_PARAMS[sym].maxLtv, locale)}</td>
-                    <td className="px-4 py-3 font-mono">{formatPercent(COLLATERAL_PARAMS[sym].liquidationThreshold, locale)}</td>
+                    <td className="px-4 py-3 tabular-nums">{formatUsd(TOKENS[sym].usd, locale)}</td>
+                    <td className="px-4 py-3 tabular-nums">{formatPercent(COLLATERAL_PARAMS[sym].maxLtv, locale)}</td>
+                    <td className="px-4 py-3 tabular-nums">{formatPercent(COLLATERAL_PARAMS[sym].liquidationThreshold, locale)}</td>
                   </tr>
                 ))}
               </tbody>

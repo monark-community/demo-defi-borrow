@@ -153,7 +153,7 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
                 onBlur={() => setTouched(true)}
                 aria-invalid={touched && !!error}
                 aria-describedby="repay-hint repay-error"
-                className="h-12 pr-20 font-mono text-lg"
+                className="h-12 pr-20 tabular-nums text-lg"
               />
               <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-semibold text-muted-foreground">{sym}</span>
             </div>
@@ -182,7 +182,7 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
           </div>
         ) : (
           <div className="rounded-2xl border bg-muted/40 p-4">
-            <p className="font-mono text-2xl font-bold tabular-nums">{formatToken(owed, sym, locale, 4)}</p>
+            <p className="tabular-nums text-2xl font-bold ">{formatToken(owed, sym, locale, 4)}</p>
             <p className="mt-1 text-xs text-muted-foreground">{r.fullNote}</p>
             <p className="mt-3 text-sm font-semibold">{t(r.unlock, { amount: formatToken(loan.collateral, loan.collateralSymbol, locale) })}</p>
           </div>
@@ -201,7 +201,7 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
               <Amount value={remaining} symbol={sym} />
             </Row>
             <Row label={r.newHealth}>
-              <span className="font-mono font-semibold">{remaining <= 0.000001 ? terms.noDebt : formatHealth(healthAfter, locale)}</span>
+              <span className="tabular-nums font-semibold">{remaining <= 0.000001 ? terms.noDebt : formatHealth(healthAfter, locale)}</span>
             </Row>
           </dl>
         ) : null}

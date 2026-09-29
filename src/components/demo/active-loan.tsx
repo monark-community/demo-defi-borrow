@@ -11,13 +11,12 @@ import { daysBetween, graceEndsAt, positionOf, rescueOptions } from "@/lib/demo/
 import { useDemo, useDemoNow } from "@/lib/demo/store"
 import { COLLATERAL_PARAMS, RESCUE_HEALTH } from "@/lib/demo/tokens"
 import type { Loan } from "@/lib/demo/types"
-import { formatApr, formatDate, formatHealth, formatNumber, formatPercent, formatToken, formatUsd } from "@/lib/format"
+import { formatDate, formatHealth, formatNumber, formatPercent, formatToken, formatUsd } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 import { AddCollateralDialog } from "./add-collateral-dialog"
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { LoanActivity } from "./loan-activity"
 import { LoanDetails } from "./loan-details"
 import { MarketPanel } from "./market-panel"
@@ -97,7 +96,7 @@ function LoanBanner({ loan }: { loan: Loan }) {
 function OweCard({ loan }: { loan: Loan }) {
   const demo = useDemo()
   const now = useDemoNow(1000)
-  const { app, locale, disclaimer } = useAppCopy()
+  const { app, locale } = useAppCopy()
   const o = app.owe
   if (!demo) return null
   const pos = positionOf(loan, demo.market, now)
@@ -145,7 +144,6 @@ function OweCard({ loan }: { loan: Loan }) {
           <AddCollateralDialog loan={loan} disabled={busy} />
         </div>
         {busy ? <p className="text-xs text-muted-foreground">{app.actions.busy}</p> : null}
-        <Disclaimer text={disclaimer} />
       </div>
     </section>
   )
@@ -194,9 +192,6 @@ function HealthCard({ loan }: { loan: Loan }) {
           <dd className="mt-1 font-semibold">
             {formatPercent(pos.ltv, locale, 1)}{" "}
             <span className="font-normal text-muted-foreground">· {t(app.health.limit, { pct: formatPercent(params.liquidationThreshold, locale) })}</span>
-          </dd>
-          <dd className="mt-1 text-xs text-muted-foreground">
-            {t(app.loan.apr, { apr: formatApr(pos.apr, locale) })}
           </dd>
         </div>
       </dl>

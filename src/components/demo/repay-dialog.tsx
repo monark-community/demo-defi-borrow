@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils"
 
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { TxFeedback } from "./tx-feedback"
 
 type Mode = "partial" | "full"
@@ -28,7 +27,7 @@ type Mode = "partial" | "full"
 export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean }) {
   const demo = useDemo()
   const now = useDemoNow(1000)
-  const { app, terms, locale, disclaimer } = useAppCopy()
+  const { app, terms, locale } = useAppCopy()
   const r = app.repay
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<Mode>("partial")
@@ -79,7 +78,8 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
     )
     if (ok) {
       setOpen(false)
-      toast.success(full ? r.doneFull : t(r.done, { amount: payText }))
+      // A full repayment turns the page into "Loan repaid", which says it already.
+      if (!full) toast.success(t(r.done, { amount: payText }))
       reset()
     }
   }
@@ -222,7 +222,6 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
           <Button size="lg" onClick={() => void submit()} disabled={busy || lacking}>
             {mode === "full" ? r.submitFull : t(r.submit, { amount: parsed ? formatToken(parsed, sym, locale) : sym })}
           </Button>
-          <Disclaimer text={disclaimer} />
         </div>
       </DialogContent>
     </Dialog>

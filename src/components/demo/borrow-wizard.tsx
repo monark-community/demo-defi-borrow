@@ -9,6 +9,7 @@ import { RiskBadge } from "@/components/loan/risk-badge"
 import { SafetyRunway } from "@/components/loan/safety-runway"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { InfoTip } from "@/components/ui/info-tip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { href } from "@/i18n/config"
@@ -33,7 +34,7 @@ import { ceilDisplay, formatApr, formatDate, formatHealth, formatNumber, formatP
 import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
+import { AppHeader } from "./app-header"
 import { TxSteps } from "./tx-steps"
 
 type Step = 1 | 2 | 3 | 4
@@ -45,7 +46,7 @@ const QUICK = [500, 1000, 2500]
 export function BorrowWizard() {
   const demo = useDemo()
   const now = useDemoNow(5000)
-  const { app, terms, locale, disclaimer } = useAppCopy()
+  const { app, terms, locale } = useAppCopy()
   const b = app.borrow
   const [step, setStep] = useState<Step>(1)
   const [borrowSymbol, setBorrowSymbol] = useState<LoanSymbol>("tUSDC")
@@ -180,8 +181,9 @@ export function BorrowWizard() {
           <ArrowLeftIcon className="size-4" aria-hidden="true" />
           {app.loan.title}
         </Link>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-display sm:text-4xl">{b.title}</h1>
-        <p className="mt-2 text-muted-foreground">{b.intro}</p>
+        <AppHeader className="mt-1">
+          <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{b.title}</h1>
+        </AppHeader>
       </header>
 
       <ol className="grid grid-cols-4 gap-2" aria-label={b.title}>
@@ -230,9 +232,13 @@ export function BorrowWizard() {
               <h2 id="step-title" className="mt-2 text-2xl font-extrabold tracking-display">
                 {b.need.title}
               </h2>
-              <p className="mt-2 text-muted-foreground">{b.need.body}</p>
               <fieldset className="mt-6">
-                <legend className="text-sm font-bold">{b.need.asset}</legend>
+                <legend className="flex items-center gap-1 text-sm font-bold">
+                  {b.need.asset}
+                  <InfoTip label={app.info} className="-my-2">
+                    {b.need.body}
+                  </InfoTip>
+                </legend>
                 <div role="radiogroup" aria-label={b.need.asset} className="mt-2 grid grid-cols-2 gap-2">
                   {LOAN_TOKENS.map((sym) => (
                     <Choice key={sym} checked={borrowSymbol === sym} onSelect={() => setBorrowSymbol(sym)}>
@@ -265,9 +271,13 @@ export function BorrowWizard() {
               <h2 id="step-title" className="mt-2 text-2xl font-extrabold tracking-display">
                 {b.lock.title}
               </h2>
-              <p className="mt-2 text-muted-foreground">{b.lock.body}</p>
               <fieldset className="mt-6">
-                <legend className="text-sm font-bold">{b.lock.asset}</legend>
+                <legend className="flex items-center gap-1 text-sm font-bold">
+                  {b.lock.asset}
+                  <InfoTip label={app.info} className="-my-2">
+                    {b.lock.body}
+                  </InfoTip>
+                </legend>
                 <div role="radiogroup" aria-label={b.lock.asset} className="mt-2 grid gap-2 sm:grid-cols-3">
                   {COLLATERALS.map((sym) => {
                     const p = COLLATERAL_PARAMS[sym]
@@ -295,7 +305,7 @@ export function BorrowWizard() {
                 hint={collateral ? t(b.lock.worth, { usd: formatUsd(collUsd, locale) }) : t(b.lock.balance, { amount: formatToken(balance, collateralSymbol, locale) })}
               />
               {amount && suggested > 0 ? (
-                <div className="mt-3">
+                <div className="mt-3 flex items-center gap-1">
                   <Button
                     size="sm"
                     variant="outline"
@@ -305,7 +315,7 @@ export function BorrowWizard() {
                     <SparklesIcon aria-hidden="true" />
                     {t(b.lock.suggest, { amount: formatToken(suggested, collateralSymbol, locale) })}
                   </Button>
-                  <p className="mt-1.5 text-xs text-muted-foreground">{b.lock.suggestHint}</p>
+                  <InfoTip label={app.info}>{b.lock.suggestHint}</InfoTip>
                 </div>
               ) : null}
             </div>
@@ -316,7 +326,6 @@ export function BorrowWizard() {
               <h2 id="step-title" className="mt-2 text-2xl font-extrabold tracking-display">
                 {b.terms.title}
               </h2>
-              <p className="mt-2 text-muted-foreground">{b.terms.body}</p>
               <fieldset className="mt-6">
                 <legend className="text-sm font-bold">{b.terms.term}</legend>
                 <div role="radiogroup" aria-label={b.terms.term} className="mt-2 grid grid-cols-3 gap-2">
@@ -384,9 +393,6 @@ export function BorrowWizard() {
                   <p className="mt-3 text-lg">
                     {t(b.review.sentence, { collateral: collLabel, amount: amountLabel, total: totalLabel, date: formatDate(dueAt, locale) })}
                   </p>
-                  <p className="mt-2 font-semibold">
-                    {t(b.review.risk, { token: collateralSymbol, price: formatUsd(liqPrice, locale) })}
-                  </p>
                   <div className="mt-6 flex items-start gap-3 rounded-2xl border p-4">
                     <Checkbox
                       id="ack"
@@ -397,7 +403,7 @@ export function BorrowWizard() {
                       aria-describedby="ack-error"
                       className="mt-0.5"
                     />
-                    <Label htmlFor="ack" className="text-sm leading-relaxed font-normal">
+                    <Label htmlFor="ack" className="text-sm leading-relaxed font-semibold">
                       {t(b.review.ack, { price: formatUsd(liqPrice, locale), date: formatDate(dueAt, locale) })}
                     </Label>
                   </div>
@@ -432,7 +438,6 @@ export function BorrowWizard() {
                       {failed ? <RotateCcwIcon aria-hidden="true" /> : <PenLineIcon aria-hidden="true" />}
                       {failed ? app.tx.retry : approveTx.state.phase === "confirmed" ? b.review.continue : b.review.go}
                     </Button>
-                    <Disclaimer text={disclaimer} />
                   </div>
                 </>
               )}

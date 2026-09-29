@@ -18,13 +18,12 @@ import type { Loan } from "@/lib/demo/types"
 import { ceilDisplay, formatHealth, formatToken, formatUsd } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { TxSteps } from "./tx-steps"
 
 export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?: boolean }) {
   const demo = useDemo()
   const now = useDemoNow(1000)
-  const { app, locale, disclaimer } = useAppCopy()
+  const { app, locale } = useAppCopy()
   const a = app.add
   const [open, setOpen] = useState(false)
   const [text, setText] = useState("")
@@ -110,7 +109,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
       <DialogContent closeLabel={app.close} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-extrabold">{a.title}</DialogTitle>
-          <DialogDescription>{t(a.body, { token: sym })}</DialogDescription>
+          <DialogDescription>{a.body}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
@@ -196,7 +195,6 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
             {failed ? <RotateCcwIcon aria-hidden="true" /> : <LockIcon aria-hidden="true" />}
             {failed ? app.tx.retry : a.submit}
           </Button>
-          <Disclaimer text={disclaimer} />
         </div>
       </DialogContent>
     </Dialog>

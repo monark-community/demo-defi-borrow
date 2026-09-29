@@ -4,6 +4,7 @@ import { useRef } from "react"
 import { FastForwardIcon, RotateCcwIcon, TrendingDownIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -35,10 +36,12 @@ export function MarketPanel({ loan }: { loan: Loan }) {
 
   return (
     <section aria-labelledby="market-title" className="scroll-mt-24 rounded-3xl border border-dashed border-input bg-secondary/40 p-5 sm:p-6">
-      <h2 id="market-title" className="text-lg font-bold">
-        {m.title}
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t(m.body, { token: symbol })}</p>
+      <div className="-my-1 flex items-center justify-between gap-2">
+        <h2 id="market-title" className="text-lg font-bold">
+          {m.title}
+        </h2>
+        <InfoTip label={app.info}>{m.body}</InfoTip>
+      </div>
 
       <div className="mt-5">
         <div className="flex items-baseline justify-between gap-3">
@@ -71,7 +74,6 @@ export function MarketPanel({ loan }: { loan: Loan }) {
             checkTerms()
           }}
         />
-        <p className="mt-1 text-xs text-muted-foreground">{t(m.reference, { price: formatUsd(ref, locale) })}</p>
         <div role="group" aria-label={m.presets} className="mt-3 flex flex-wrap gap-2">
           {PRESETS.map((p) => (
             <Button key={p} size="sm" variant="outline" disabled={busy} onClick={() => setPrice(symbol, ref * (1 + p))}>
@@ -110,7 +112,6 @@ export function MarketPanel({ loan }: { loan: Loan }) {
           <span className="text-xs text-muted-foreground">{t(m.clock, { date: formatDate(now, locale) })}</span>
         </div>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">{m.oracle}</p>
     </section>
   )
 }

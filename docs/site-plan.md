@@ -1,6 +1,6 @@
-# BorrowX by Monark: site plan
+# BorrowX: site plan
 
-Status: shipped on `develop`. This plan describes what the site does and is kept in sync with the code (see "Decisions made while building" at the end).
+Status: shipped on `develop`. This plan describes what the site does and is kept in sync with the code (see "Decisions made while building" at the end). A simplification pass (less text, context on demand, one top bar, standard header) is recorded in `docs/simplification.md`.
 
 - Product: **BorrowX**, the borrower's side of the Monark DeFi family.
 - Authoritative description: https://www.monark.io/en/project/defi-borrow
@@ -63,10 +63,10 @@ Supporting benefits, as outcomes:
 
 - **Headline** (7 words): *Borrow against your crypto, with eyes open.*
   FR: *Empruntez sur vos cryptos, en toute lucidité.*
-- **Subheadline:** *BorrowX walks you through one loan at a time: what you lock, what you receive, the price that would put your collateral at risk, and what you owe today.*
-  FR: *BorrowX vous accompagne un prêt à la fois : ce que vous bloquez, ce que vous recevez, le prix qui mettrait votre garantie en danger et ce que vous devez aujourd'hui.*
+- **Subheadline:** *See what you lock, what you owe, and the price that would cost you your collateral.*
+  FR: *Voyez ce que vous bloquez, ce que vous devez et le prix qui vous coûterait votre garantie.*
 - **Primary CTA:** "Start a demo loan" / « Démarrer un prêt de démo » → `/{locale}/app`.
-- **Secondary CTA:** "See how loans work" / « Comprendre les prêts » → `/{locale}/how-it-works`.
+- **Secondary CTA:** "How loans work" / « Comprendre les prêts » → `/{locale}/how-it-works`.
 - **Visual:** a **live loan card built in code** (product UI, not a photo): 2,000 tUSDC borrowed against 1.2 tETH. Its safety runway shows the tETH price drifting calmly (±6%), the "today" marker sliding along the track, the health factor and the sentence "tETH can fall 36% before your collateral is sold" updating with it. It is the product's point of view in one picture: a loan is a distance to a price. The mesh butterfly sits large and cropped behind the hero (see §8).
 
 ## 4. Page map
@@ -75,19 +75,21 @@ All routes live under `/{locale}` (`en`, `fr`). `/` and any locale-less path red
 
 | Route | Purpose | Sections, in order |
 |-|-|-|
-| `/{locale}` | Home: make the idea clear in 30 seconds and send people into the demo. | Hero with the live loan card · "Three questions before you borrow" (the three outcomes) · A loan in four steps (line diagram) · The safety runway explained (static runway with the three states) · Made for learning (photo + copy) · FAQ · Closing call to action |
+| `/{locale}` | Home: make the idea clear in 30 seconds and send people into the demo. | Hero with the live loan card · A loan in four steps (line diagram) · The safety runway (static runway with the three states) · Learn lending by living it (photo + one line) · FAQ (4 questions) · Closing call to action (heading + button) |
 | `/{locale}/app` | The interactive demo: your one loan. | Connect gate (disconnected) · **No loan**: empty state with "Request a loan" and "Explore a running example" · **Active loan**: what you owe (live), health and safety runway, actions (repay, add collateral), market simulator (move the price, skip ahead in time), repayment path, loan activity · **Closed loan**: repaid or liquidated summary, withdraw collateral, start a new loan · Wallet balances · Loan history |
 | `/{locale}/app/borrow` | Guided loan request. | Step 1 What you need · Step 2 What you lock (with suggested safe amount) · Step 3 Your terms (term, fixed or variable, cost) · Step 4 Review and sign (two transactions: allow, then lock and borrow) · Live summary with safety runway beside the steps (below on mobile) |
-| `/{locale}/how-it-works` | The mechanics, for students, developers and careful borrowers. Justified because the documentation frames BorrowX as a teaching project about lending maths and time-based state. | Intro · A loan's life (diagram) · Collateral and limits (parameters table) · Health factor and the safety runway (worked example) · Interest, fixed or variable (formula + example) · Due dates and enforcement · Liquidation, step by step (worked example) · Borrower levels · For developers (contract interface + how the demo's data layer mirrors it; standalone or plugged into a pool like VaultLend) · Call to action |
+| `/{locale}/how-it-works` | The mechanics, for students, developers and careful borrowers. Justified because the documentation frames BorrowX as a teaching project about lending maths and time-based state. | Intro (one line) · A loan's life (diagram) · Collateral and limits (parameters table) · Health factor and the safety runway (worked example) · Interest, fixed or variable (formula + example) · Due dates and enforcement · Liquidation, step by step (worked example) · Borrower levels · For developers (one line; the contract interface behind a "Show the contract interface" disclosure) · Call to action |
 | `/{locale}/credits` | Photo, font, icon and brand credits (required by the asset rules). | Photos · Type and icons · Monark brand assets |
 | `/{locale}/pricing` | **Internal strategy review only.** Never linked, excluded from the sitemap, `noindex, nofollow`. | "Free, part of Monark" · What a borrower pays (network fees only, 0% protocol fee in the demo) · Partner cohorts · Reasoning |
 | 404 | Friendly not-found with the vertical Monark logo, links home and to the demo. | |
 
 The demo keeps one route for the loan (`/app`) instead of `/app/loan/[id]` because BorrowX is deliberately one loan at a time; past loans are a short history list.
 
-**Header** (standard Monark shell): "BorrowX by Monark" pairing → home · links: *Overview*, *How it works*, *Demo* (pill highlight on the active one) · EN/FR switch · theme toggle · primary pill *Launch demo*. Inside `/app` the primary action becomes the `connect-wallet` component and a "Demo · simulated data" badge appears. Mobile: pairing + menu button opening a full-height sheet.
+**Header** (standard Monark shell, guidelines §2 and §10): butterfly mark 28px + "BorrowX" (Nunito Sans 800, 18px) on one line, no "by Monark" → home · links left, right after the brand: *Overview*, *How it works*, *Demo* (active in foreground) · right side: Demo chip (primary 8% light / 15% dark) → EN/FR pill → 36px theme toggle → *Launch demo*. Inside `/app` the primary action becomes the `connect-wallet` component. Below `lg`: brand + menu button opening a full-height sheet (links, Demo chip, EN/FR, theme, action). Marketing pages have this one bar only.
 
-**Footer** (three bands): product line + links (Overview, How it works, Demo, Credits) and a "Part of the Monark DeFi demos" row (Fluidswap, Yieldmine, VaultLend) · Monark logo + tagline, links to the project page and the GitHub repo, social icons · "© {year} Monark · Open source", "Demo · simulated data", the testnet notice, photo credits link.
+**App chrome:** no strip under the header. Each app page title row carries one pill on the right, "● Sepolia testnet | Demo controls" (icon-only on phones), that opens the demo controls.
+
+**Footer** (three bands): product line ("The borrower's side of the Monark DeFi demos.") + links (Overview, How it works, Demo, Credits) and a "Part of the Monark DeFi demos" row (Fluidswap, Yieldmine, VaultLend) · "BorrowX is built by Monark" / « BorrowX est conçu par Monark », Monark logo + tagline, links to the project page and the GitHub repo, social icons · "© {year} Monark · Open source", "Demo · simulated data", photo credits link. The testnet notice appears only in the wallet prompt of value-moving transactions (guidelines §11).
 
 ## 5. Feature highlights
 
@@ -129,54 +131,36 @@ The full microcopy lives in `src/i18n/dictionaries/en.ts` and `fr.ts`; the secti
 
 | Section | English | French |
 |-|-|-|
-| Eyebrow | Borrowing, explained as you go | L'emprunt, expliqué pas à pas |
 | Headline | Borrow against your crypto, with eyes open. | Empruntez sur vos cryptos, en toute lucidité. |
-| Sub | BorrowX walks you through one loan at a time: what you lock, what you receive, the price that would put your collateral at risk, and what you owe today. | BorrowX vous accompagne un prêt à la fois : ce que vous bloquez, ce que vous recevez, le prix qui mettrait votre garantie en danger et ce que vous devez aujourd'hui. |
-| CTAs | Start a demo loan · See how loans work | Démarrer un prêt de démo · Comprendre les prêts |
-| Questions title | Three questions to ask before you borrow | Trois questions à se poser avant d'emprunter |
-| Questions intro | Most lending apps show you ratios. BorrowX answers the questions a careful borrower actually asks. | La plupart des applications de prêt affichent des ratios. BorrowX répond aux questions qu'un emprunteur prudent se pose vraiment. |
-| Q1 | **How much can I safely borrow?** BorrowX suggests an amount that leaves room for the market to move, and tells you the price that would put your collateral at risk. | **Combien puis-je emprunter sans risque ?** BorrowX propose un montant qui laisse de la marge au marché et vous indique le prix qui mettrait votre garantie en danger. |
-| Q2 | **What could go wrong?** If your collateral loses value, you see it coming: safe, at risk, then liquidatable, each with a plain explanation and a way out. | **Qu'est-ce qui pourrait mal tourner ?** Si votre garantie perd de la valeur, vous le voyez venir : en sécurité, à risque, puis liquidable, chaque fois avec une explication claire et une porte de sortie. |
-| Q3 | **What do I owe right now?** Interest adds up every second and the due date is always in view. Every payment shows what it paid off. | **Combien est-ce que je dois maintenant ?** Les intérêts s'ajoutent à chaque seconde et l'échéance reste toujours visible. Chaque paiement montre ce qu'il a remboursé. |
+| Sub | See what you lock, what you owe, and the price that would cost you your collateral. | Voyez ce que vous bloquez, ce que vous devez et le prix qui vous coûterait votre garantie. |
+| CTAs | Start a demo loan · How loans work | Démarrer un prêt de démo · Comprendre les prêts |
 | Steps title | A loan in four steps | Un prêt en quatre étapes |
-| Steps | 1 Choose what you need (tUSDC or tDAI, and how much). 2 Lock your collateral (tETH, tWBTC or tLINK stays in the contract, not with a person). 3 Receive the loan in your wallet in one transaction. 4 Repay when you like, before the due date, and your collateral unlocks. | 1 Choisissez ce qu'il vous faut (tUSDC ou tDAI, et le montant). 2 Bloquez votre garantie (vos tETH, tWBTC ou tLINK restent dans le contrat, pas chez quelqu'un). 3 Recevez le prêt dans votre portefeuille en une transaction. 4 Remboursez quand vous voulez avant l'échéance, et votre garantie se débloque. |
-| Runway title | The safety runway | La piste de sécurité |
-| Runway body | Your loan is safe as long as your collateral is worth enough. The runway shows today's price, the price where your loan becomes at risk, and the price where your collateral can be sold. The longer the green stretch, the more room you have. | Votre prêt est en sécurité tant que votre garantie vaut assez. La piste montre le prix d'aujourd'hui, le prix où votre prêt devient à risque et celui où votre garantie peut être vendue. Plus la zone verte est longue, plus vous avez de marge. |
-| States | Safe: health 1.50 or more, there is room for the price to move. · At risk: between 1.00 and 1.50, add collateral or repay a little. · Liquidatable: below 1.00, part of your collateral can be sold to repay the loan. | En sécurité : santé de 1,50 ou plus, le prix a de la marge. · À risque : entre 1,00 et 1,50, ajoutez de la garantie ou remboursez un peu. · Liquidable : sous 1,00, une partie de votre garantie peut être vendue pour rembourser le prêt. |
-| Learning title | Made for learning, together | Pensé pour apprendre, ensemble |
-| Learning body | BorrowX is a Monark reference project for students, developers and workshop leaders. Everything runs on a simulated testnet: move the market, skip ahead a month, and watch what a smart contract does with your loan, without risking a cent. | BorrowX est un projet de référence de Monark pour les étudiants, les développeurs et les animateurs d'ateliers. Tout se passe sur un testnet simulé : faites bouger le marché, avancez d'un mois et observez ce qu'un contrat intelligent fait de votre prêt, sans risquer un sou. |
-| Learning CTA | Read how loans work | Lire le fonctionnement des prêts |
-| FAQ | see below | voir plus bas |
-| Closing | **Try a loan you can't lose money on.** Borrow, move the market, repay. It takes about two minutes. → Start a demo loan | **Essayez un prêt sans rien risquer.** Empruntez, faites bouger le marché, remboursez. Deux minutes suffisent. → Démarrer un prêt de démo |
+| Steps | 1 Choose what you need (tUSDC or tDAI, with the rate up front). 2 Lock your collateral (it stays in the contract, not with a person). 3 Receive the loan (in the same transaction). 4 Repay, get it back (any time before the due date). | 1 Choisissez ce qu'il vous faut. 2 Bloquez votre garantie. 3 Recevez le prêt. 4 Remboursez, récupérez. |
+| Runway | **The safety runway.** The longer the green stretch, the more room your loan has. States: Safe (health 1.50 or more) · At risk (1.00 to 1.50: add collateral or repay) · Liquidatable (below 1.00: collateral can be sold) | **La piste de sécurité.** Plus la zone verte est longue, plus votre prêt a de marge. |
+| Learning | **Learn lending by living it.** Move the market, skip ahead a month, and watch the contract react. → Read how loans work | **Apprendre le prêt en le vivant.** Faites bouger le marché, avancez d'un mois et voyez le contrat réagir. |
+| Closing | **Try a loan you can't lose money on.** → Start a demo loan | **Essayez un prêt sans rien risquer.** → Démarrer un prêt de démo |
 
-**FAQ** (home):
-
-1. *Is this real money?* No. BorrowX is a demo on a simulated testnet. Tokens like tETH and tUSDC have no value, and no transaction leaves your browser. / *Est-ce de l'argent réel ?* Non. BorrowX est une démo sur un testnet simulé. Les jetons comme tETH et tUSDC n'ont aucune valeur et aucune transaction ne quitte votre navigateur.
-2. *Why do I have to lock more than I borrow?* There is no credit check on-chain, so the loan is secured by collateral worth more than the loan. If you don't repay, the contract can sell it instead of chasing you. / *Pourquoi bloquer plus que ce que j'emprunte ?* Il n'y a pas d'enquête de crédit on-chain : le prêt est donc garanti par des actifs qui valent plus que le prêt. Si vous ne remboursez pas, le contrat peut les vendre plutôt que de vous poursuivre.
-3. *What happens if the price of my collateral drops?* Your health factor goes down. Below 1.50 your loan is at risk and BorrowX suggests how much to add or repay. Below 1.00 a liquidator can repay your debt and take collateral worth the debt plus a 5% penalty; the rest comes back to you. / *Que se passe-t-il si le prix de ma garantie baisse ?* Votre facteur de santé diminue. Sous 1,50, votre prêt est à risque et BorrowX vous suggère combien ajouter ou rembourser. Sous 1,00, un liquidateur peut rembourser votre dette et prendre de la garantie d'une valeur égale à la dette plus une pénalité de 5 % ; le reste vous revient.
-4. *Fixed or variable rate?* A fixed rate is locked when the loan opens. A variable rate starts lower but follows demand in the pool, so it can rise. / *Taux fixe ou variable ?* Un taux fixe est verrouillé à l'ouverture du prêt. Un taux variable part plus bas, mais suit la demande dans le pool : il peut donc monter.
-5. *Can I repay early or in parts?* Yes, any amount, any time before the due date. Interest is only charged for the time you actually borrowed. / *Puis-je rembourser plus tôt ou en plusieurs fois ?* Oui, n'importe quel montant, à tout moment avant l'échéance. Les intérêts ne sont calculés que sur la durée réelle de l'emprunt.
-6. *How is BorrowX different from VaultLend and Yieldmine?* BorrowX is the borrower's view of one loan. Yieldmine is for people supplying assets to earn yield, and VaultLend shows the protocol's risk across all positions. / *En quoi BorrowX diffère-t-il de VaultLend et Yieldmine ?* BorrowX est le point de vue de l'emprunteur, pour un prêt. Yieldmine s'adresse à ceux qui prêtent leurs actifs pour obtenir un rendement, et VaultLend montre le risque du protocole sur l'ensemble des positions.
+**FAQ** (home only, 4 questions): *Is this real money?* · *Why do I have to lock more than I borrow?* · *What happens if the price of my collateral drops?* · *How is BorrowX different from VaultLend and Yieldmine?* Answers are one line (12–15 words); fixed vs. variable and early repayment are covered in the interest section of `/how-it-works`. Full copy in the dictionaries.
 
 ### Demo app (main strings)
 
 | Where | English | French |
 |-|-|-|
-| Gate | **Your loan, one step at a time.** Connect the demo wallet to borrow test tokens against test collateral. Nothing real is signed. · Connect demo wallet | **Votre prêt, une étape à la fois.** Connectez le portefeuille de démo pour emprunter des jetons de test contre une garantie de test. Rien de réel n'est signé. · Connecter le portefeuille de démo |
+| Gate | **Your loan, one step at a time.** Borrow test tokens against test collateral. · Connect demo wallet | **Votre prêt, une étape à la fois.** Empruntez des jetons de test contre une garantie de test. · Connecter le portefeuille de démo |
 | Gate rejected | You declined the sign-in request. Nothing was shared. | Vous avez refusé la demande de connexion. Rien n'a été partagé. |
-| Empty state | **No loan yet.** Tell BorrowX what you need and it will show you what to lock and how much room you'll have. · Request a loan · Explore a running example | **Aucun prêt pour l'instant.** Dites à BorrowX ce qu'il vous faut : il vous montrera quoi bloquer et de combien de marge vous disposerez. · Demander un prêt · Explorer un exemple en cours |
+| Empty state | **What do you need to borrow?** · Request a loan · Explore a running example (2,000 tUSDC, 41 days in.) | **De quoi avez-vous besoin ?** · Demander un prêt · Explorer un exemple en cours |
 | Owe card | You owe · principal · interest so far · Due {date} · in {n} days | Vous devez · capital · intérêts à ce jour · Échéance le {date} · dans {n} jours |
 | Health | Safe · At risk · Liquidatable — "{token} can fall {pct} before your collateral can be sold." / "Your collateral can be sold now." | En sécurité · À risque · Liquidable — « Le {token} peut baisser de {pct} avant que votre garantie puisse être vendue. » / « Votre garantie peut être vendue dès maintenant. » |
 | At-risk banner | Your loan is at risk. Add {amount} or repay {amount} to get back to safe. | Votre prêt est à risque. Ajoutez {amount} ou remboursez {amount} pour revenir en sécurité. |
-| Market panel | **Try it: move the market.** Demo only: change the tETH price or skip ahead in time to see how your loan reacts. · Skip 7 days · Skip 30 days · Reset price | **À vous de jouer : faites bouger le marché.** Démo seulement : changez le prix du tETH ou avancez dans le temps pour voir comment votre prêt réagit. · Avancer de 7 jours · Avancer de 30 jours · Rétablir le prix |
+| Market panel | **Try it: move the market** (info icon: "Demo only. In a real protocol, prices come from an oracle.") · -10% / -25% / -40% · Reset price · High demand in the pool · +7 days · +30 days | **À vous de jouer : faites bouger le marché** (icône d'info) · Rétablir le prix · +7 jours · +30 jours |
 | Repaid | **Loan repaid.** Your collateral is unlocked. · Withdraw {amount} | **Prêt remboursé.** Votre garantie est débloquée. · Retirer {amount} |
-| Liquidated | **Your loan was liquidated.** tETH fell to {price}, below your liquidation price. A liquidator repaid {debt} and received {seized} (including the 5% penalty). {left} is yours to withdraw. | **Votre prêt a été liquidé.** Le tETH est descendu à {price}, sous votre prix de liquidation. Un liquidateur a remboursé {debt} et reçu {seized} (pénalité de 5 % comprise). Il vous reste {left} à retirer. |
+| Liquidated | **Your loan was liquidated.** tETH fell to {price}, below your liquidation price. (The breakdown shows the debt repaid, the collateral sold with the 5% penalty, and what is left.) | **Votre prêt a été liquidé.** Le tETH est descendu à {price}, sous votre prix de liquidation. |
 | Overdue | The due date has passed. You have until {date} to repay before the contract closes the loan. | L'échéance est passée. Vous avez jusqu'au {date} pour rembourser avant que le contrat ne ferme le prêt. |
 | Tx states | Confirm in your wallet… · Waiting for the network… · Confirmed · Failed. You rejected the request in your wallet. / The transaction failed on the network. Nothing moved. · Try again | Confirmez dans votre portefeuille… · En attente du réseau… · Confirmée · Échec. Vous avez refusé la demande dans votre portefeuille. / La transaction a échoué sur le réseau. Rien n'a bougé. · Réessayer |
 | Validation | Enter an amount. · That's more than your wallet holds. · That's above the {pct} limit for {token}: lock more or borrow less. · You need {amount} more tUSDC. Get test tokens | Saisissez un montant. · C'est plus que ce que contient votre portefeuille. · C'est au-delà de la limite de {pct} pour le {token} : bloquez plus ou empruntez moins. · Il vous manque {amount} tUSDC. Obtenir des jetons de test |
 | History empty | Loans you close will appear here. | Les prêts que vous fermez apparaîtront ici. |
-| Storage error | Your browser is blocking storage, so the demo will reset when you leave the page. | Votre navigateur bloque le stockage : la démo sera réinitialisée quand vous quitterez la page. |
-| Controls | Demo controls · Slow network · Fail the next transaction · Get test stablecoins (500 tUSDC and 500 tDAI) · Reset demo (Start over with the example wallet? Your loan, history and market changes will be cleared.) | Contrôles de la démo · Réseau lent · Faire échouer la prochaine transaction · Obtenir des stablecoins de test (500 tUSDC et 500 tDAI) · Réinitialiser la démo (Recommencer avec le portefeuille d'exemple ? Votre prêt, votre historique et vos changements de marché seront effacés.) |
+| Storage error | Storage is blocked: the demo resets when you leave. | Stockage bloqué : la démo se réinitialise quand vous partez. |
+| Controls | Demo controls · Slow network · Fail the next transaction · Get test stablecoins (500 tUSDC and 500 tDAI) · Reset demo (Start over with the example wallet? Your loan and history will be cleared.) | Contrôles de la démo · Réseau lent · Faire échouer la prochaine transaction · Obtenir des stablecoins de test (500 tUSDC et 500 tDAI) · Réinitialiser la démo (Recommencer avec le portefeuille d'exemple ? Votre prêt et votre historique seront effacés.) |
 
 ### How it works
 
@@ -184,18 +168,18 @@ Headings (EN / FR): *How a BorrowX loan works* / *Comment fonctionne un prêt Bo
 
 ### Errors and empty states (site-wide)
 
-- 404: *Page not found* / *Page introuvable* — "This page has moved or never existed. Your demo loan is safe where you left it." / « Cette page a été déplacée ou n'a jamais existé. Votre prêt de démo vous attend là où vous l'avez laissé. »
+- 404: *Page not found* / *Page introuvable* — "This page doesn't exist. Your demo loan is where you left it." / « Cette page n'existe pas. Votre prêt de démo vous attend. »
 - Error boundary: *Something went wrong* / *Un problème est survenu* — "The page hit an unexpected error. Your demo data is still saved in this browser." / « La page a rencontré une erreur inattendue. Vos données de démo sont toujours enregistrées dans ce navigateur. » · Try again / Réessayer.
 
 ## 8. Aesthetics (Monark-branded)
 
-Colour, type, logo, header and footer come from the guidelines (§3 token block pasted over the `@monark/ui` theme, Nunito Sans, "BorrowX by Monark" pairing, standard shell). What this plan decides:
+Colour, type, logo, header and footer come from the guidelines (§3 token block pasted over the `@monark/ui` theme, Nunito Sans, butterfly mark + "BorrowX" product brand, standard shell). What this plan decides:
 
 - **Layouts and rhythm.** Marketing pages are short and airy: a hero, then alternating plain and `secondary`-tinted bands, the branded section divider used once per page. The app is denser and calmer: a single column on mobile; on desktop a two-column grid where the money (you owe, health) sits left and actions and the market simulator sit right. Numbers are big and tabular (monospace only for amounts, addresses and hashes, through `token-amount` and `wallet`).
 - **Hero visual.** The live loan card with its safety runway (§3), set on a near-white card over cream.
 - **Mesh butterfly.** Yes, once: large, cropped off the top right of the home hero at ~10% opacity (16% on espresso), behind the loan card. Nowhere else. No gradients anywhere.
 - **Illustrations.** No Monark illustration files are reused (their glow versions don't fit); all diagrams are new flat line art in orange strokes (1.75px, round caps), drawn in JSX: the four-step loan path, the safety runway, the padlock (collateral lock), the loan-life timeline and the liquidation breakdown bar.
-- **Photography direction.** Warm, natural-light photos of students learning together, wood and daylight tones that sit on cream and espresso; used only on the home "Made for learning" band and the top of `/how-it-works`, always next to a clear line of copy. No coins, charts or hoodies.
+- **Photography direction.** Warm, natural-light photos of students learning together, wood and daylight tones that sit on cream and espresso; used only on the home "Learn lending by living it" band and the top of `/how-it-works`, always next to a clear line of copy. No coins, charts or hoodies.
 - **Status colours.** Muted green (safe), amber (at risk) and red (liquidatable), always with the word; never orange, which stays the action colour.
 - **Signature moments.**
   1. **The safety runway moves.** In the borrow wizard, every change of amount or collateral slides the liquidation marker along the track and rewrites the sentence "tETH can fall 36%…"; on the dashboard, dragging the market price slides the "today" marker toward it, crossing from green into amber and red.
@@ -206,7 +190,7 @@ Colour, type, logo, header and footer come from the guidelines (§3 token block 
 
 | Asset | Purpose | Placement |
 |-|-|-|
-| `public/images/lecture-hall.jpg` (Unsplash, Vitaly Gariev) | Students talking in a warm lecture hall: the learning audience | Home, "Made for learning" band |
+| `public/images/lecture-hall.jpg` (Unsplash, Vitaly Gariev) | Students talking in a warm lecture hall: the learning audience | Home, "Learn lending by living it" band |
 | `public/images/study-table.jpg` (Unsplash, Alexis Brown) | Two people reading and taking notes at a wooden table: careful, self-paced learning | `/how-it-works` intro |
 | `public/brand/*` | Monark mark, horizontal and vertical logos (light/dark), mesh butterfly, social icons | Header, footer, 404, hero, OG image |
 | `src/app/icon.svg` | Favicon: the Monark mark (products use the butterfly as their mark) | Browser tab |
@@ -237,5 +221,7 @@ Icons: `lucide-react` only (1.75px stroke). Diagrams built in code: safety runwa
 - **Adding collateral uses the same two-transaction pattern** as opening a loan (allowance, then add), and allowances are logged in the loan activity.
 - **Market panel:** a slider (30% to 130% of the reference price) plus -10% / -25% / -40% presets and a reset. Enforcement is checked when the slider rests (keyboard changes included), not on every pixel, so dragging through the red zone and back doesn't liquidate.
 - **Liquidation is automatic but visible:** a keeper job shows a pending transaction with its hash for a block or two before the loan closes; actions are disabled meanwhile.
-- **Toasts** sit top-right below the header and app strip (desktop) and full width below the header (mobile), so they never cover the amount owed or the runway they report on, nor the demo controls.
+- **Toasts** sit top-right below the header (desktop) and full width below the header (mobile), so they never cover the amount owed or the runway they report on. One message, once: no toast after a full repayment or a withdrawal (the loan card says it); partial repayments, added collateral, the faucet and reset keep theirs.
+- **Context on demand** (simplification pass): no intro paragraphs above forms; the "why" sits behind info icons (`src/components/ui/info-tip.tsx`, a popover that works on touch) on "Loan asset", "Collateral", the safe amount, the market panel and the borrower level. The testnet line appears only in the wallet prompt of value-moving transactions.
+- **Risk shown once:** the page title no longer repeats the Safe / At risk badge (it is on the health card), and the APR is only in "Your loan".
 - **One route for the loan** (`/app`) plus `/app/borrow`; a loan that is repaid or liquidated stays on `/app` until the visitor withdraws collateral and starts a new one.

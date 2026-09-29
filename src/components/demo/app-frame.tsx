@@ -1,36 +1,28 @@
 "use client"
 
-import { CheckIcon, Loader2Icon, WalletIcon, XCircleIcon } from "lucide-react"
+import { Loader2Icon, WalletIcon, XCircleIcon } from "lucide-react"
 import Image from "next/image"
 import type { ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
-import { NetworkBadge } from "@/components/ui/network-badge"
 import { useDemo, useStorageOk } from "@/lib/demo/store"
-import { NETWORK_NAME } from "@/lib/demo/tokens"
 import { connectWallet } from "@/lib/demo/wallet"
 
 import { useAppCopy } from "./app-provider"
-import { DemoControls } from "./demo-controls"
-import { Disclaimer } from "./disclaimer"
 
-/** App chrome under the site header: network, disclaimer, demo controls; gates on wallet connection. */
+/**
+ * The demo app under the site header. No strip of its own: the network and
+ * demo controls sit in one pill beside each page title (AppHeader), and the
+ * testnet line lives in the wallet prompt, once per transaction.
+ * Gates on wallet connection.
+ */
 export function AppFrame({ children }: { children: ReactNode }) {
   const demo = useDemo()
   const storageOk = useStorageOk()
-  const { app, disclaimer } = useAppCopy()
+  const { app } = useAppCopy()
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="border-b bg-secondary/40">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 sm:px-6">
-          <NetworkBadge name={NETWORK_NAME} variant="outline" icon={<span className="block size-full rounded-full bg-success" />} />
-          <Disclaimer text={disclaimer} className="order-last min-w-0 basis-full sm:order-none sm:basis-auto sm:flex-1" />
-          <div className="ml-auto sm:ml-0">
-            <DemoControls />
-          </div>
-        </div>
-      </div>
       {!storageOk ? (
         <p role="alert" className="mx-auto mt-4 w-full max-w-6xl px-4 text-sm text-warning sm:px-6">
           {app.storageError}
@@ -73,14 +65,6 @@ function ConnectGate() {
         {g.title}
       </h1>
       <p className="mt-3 text-muted-foreground">{g.body}</p>
-      <ul className="mt-6 flex flex-col gap-2 text-left text-sm">
-        {g.features.map((f) => (
-          <li key={f} className="flex items-center gap-2">
-            <CheckIcon className="size-4 text-success" aria-hidden="true" />
-            {f}
-          </li>
-        ))}
-      </ul>
       <Button
         size="lg"
         className="mt-8 w-full sm:w-auto"

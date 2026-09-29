@@ -4,13 +4,13 @@ import { ArrowRightIcon, PlayIcon } from "lucide-react"
 import Link from "next/link"
 
 import { Padlock } from "@/components/loan/padlock"
-import { RiskBadge } from "@/components/loan/risk-badge"
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
-import { borrowerLevel, positionOf } from "@/lib/demo/loan-math"
+import { borrowerLevel } from "@/lib/demo/loan-math"
 import { loadExample } from "@/lib/demo/ops"
-import { useDemo, useDemoNow } from "@/lib/demo/store"
+import { useDemo } from "@/lib/demo/store"
 import { TOKENS } from "@/lib/demo/tokens"
 import type { Loan, TokenSymbol } from "@/lib/demo/types"
 import { formatDate, formatToken } from "@/lib/format"
@@ -18,24 +18,22 @@ import { cn } from "@/lib/utils"
 
 import { ActiveLoan } from "./active-loan"
 import { Amount } from "./amount"
+import { AppHeader } from "./app-header"
 import { useAppCopy } from "./app-provider"
 import { ClosedLoan } from "./closed-loan"
 
 /** /app: the visitor's one loan (none, active or closed), then wallet, level and history. */
 export function LoanHome() {
   const demo = useDemo()
-  const now = useDemoNow(1000)
-  const { app, terms } = useAppCopy()
+  const { app } = useAppCopy()
   if (!demo) return null
   const loan = demo.loan
-  const pos = loan?.status === "active" ? positionOf(loan, demo.market, now) : null
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-wrap items-center gap-3">
+      <AppHeader>
         <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{app.loan.title}</h1>
-        {pos ? <RiskBadge risk={pos.risk} label={terms.risk[pos.risk]} /> : null}
-      </header>
+      </AppHeader>
 
       {!loan ? <EmptyLoan /> : loan.status === "active" ? <ActiveLoan loan={loan} /> : <ClosedLoan loan={loan} />}
 
@@ -55,11 +53,9 @@ function EmptyLoan() {
     <section aria-labelledby="empty-title" className="grid items-center gap-8 rounded-3xl border bg-card p-6 sm:p-10 md:grid-cols-[auto_1fr]">
       <Padlock locked={false} className="mx-auto h-28 w-24 md:mx-0" />
       <div>
-        <p className="eyebrow text-primary-ink">{e.eyebrow}</p>
-        <h2 id="empty-title" className="mt-2 text-2xl font-extrabold tracking-display sm:text-3xl">
+        <h2 id="empty-title" className="text-2xl font-extrabold tracking-display sm:text-3xl">
           {e.title}
         </h2>
-        <p className="mt-3 max-w-[52ch] text-muted-foreground">{e.body}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button asChild size="lg">
             <Link href={href(locale, "/app/borrow")}>
@@ -140,9 +136,12 @@ function LevelCard() {
     level === "steady" ? t(app.level.hints.steady, { n: Math.max(1, 3 - demo.borrower.onTimeRepayments) }) : app.level.hints[level]
   return (
     <section aria-labelledby="level-title" className="rounded-3xl border bg-card p-5 sm:p-6">
-      <h2 id="level-title" className="eyebrow text-muted-foreground">
-        {app.level.title}
-      </h2>
+      <div className="-my-2 flex items-center justify-between gap-2">
+        <h2 id="level-title" className="eyebrow text-muted-foreground">
+          {app.level.title}
+        </h2>
+        <InfoTip label={app.info}>{app.level.simulated}</InfoTip>
+      </div>
       <p className="mt-3 text-2xl font-extrabold">{app.level.names[level]}</p>
       <ol className="mt-3 grid grid-cols-3 gap-1.5" aria-label={app.level.title}>
         {steps.map((s, i) => (
@@ -155,7 +154,6 @@ function LevelCard() {
         ))}
       </ol>
       <p className="mt-4 text-sm">{hint}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{app.level.simulated}</p>
     </section>
   )
 }

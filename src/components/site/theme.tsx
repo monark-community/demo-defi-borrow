@@ -15,13 +15,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 /** Toggles cream (light) / espresso (dark). Icons swap with CSS, so there is no hydration flash. */
-export function ThemeToggle({ label }: { label: string }) {
+export function ThemeToggle({ label, className }: { label: string; className?: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   return (
     <Button
       type="button"
       variant="ghost"
-      size="icon"
+      size="icon-sm"
+      className={className}
       aria-label={label}
       title={label}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

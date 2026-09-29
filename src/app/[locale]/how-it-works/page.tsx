@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CircleAlertIcon } from "lucide-react"
+import { ArrowRightIcon, ChevronRightIcon, CircleAlertIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -44,8 +44,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       {/* Intro */}
       <section aria-labelledby="how-title" className="mx-auto grid w-full max-w-6xl gap-10 px-4 pt-12 pb-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center lg:pt-16">
         <div>
-          <p className="eyebrow text-primary-ink">{h.eyebrow}</p>
-          <h1 id="how-title" className="mt-3 text-4xl font-extrabold tracking-display sm:text-5xl">
+          <h1 id="how-title" className="text-4xl font-extrabold tracking-display sm:text-5xl">
             {h.title}
           </h1>
           <p className="mt-5 max-w-[60ch] text-lg text-muted-foreground">{h.intro}</p>
@@ -55,13 +54,10 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
         </div>
       </section>
 
-      <SectionDivider />
-
       {/* A loan's life */}
       <section aria-labelledby="life-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-16">
         <H2 id="life-title">{h.life.title}</H2>
-        <p className="mt-4 max-w-[62ch] text-muted-foreground">{h.life.body}</p>
-        <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {h.life.stages.map((s, i) => (
             <li key={s.title} className="relative rounded-2xl border bg-card p-4">
               <span className="flex size-8 items-center justify-center rounded-full border-2 border-primary text-sm font-bold" aria-hidden="true">
@@ -108,7 +104,6 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">{h.collateral.note}</p>
         </div>
       </section>
 
@@ -116,7 +111,6 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       <section aria-labelledby="health-title" className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-16">
         <div>
           <H2 id="health-title">{h.health.title}</H2>
-          <p className="mt-4 text-muted-foreground">{h.health.body}</p>
           <p className="mt-5 rounded-2xl border bg-card px-4 py-3 font-mono text-sm">{h.health.formula}</p>
           <ol className="mt-5 flex flex-col gap-2 text-sm">
             {h.health.example.map((line) => (
@@ -207,11 +201,18 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       {/* Developers */}
       <section aria-labelledby="dev-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-16">
         <H2 id="dev-title">{h.developers.title}</H2>
-        <p className="mt-4 max-w-[62ch] text-muted-foreground">{h.developers.body}</p>
-        <pre className="mt-6 overflow-x-auto rounded-2xl border bg-card p-4 font-mono text-xs leading-relaxed sm:text-sm">
-          <code>{h.developers.code}</code>
-        </pre>
-        <p className="mt-4 max-w-[62ch] text-muted-foreground">{h.developers.pool}</p>
+        <p className="mt-4 max-w-[62ch] text-muted-foreground">
+          {h.developers.body} {h.developers.pool}
+        </p>
+        <details className="group mt-5">
+          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-primary-ink underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+            <ChevronRightIcon className="size-4 transition-transform group-open:rotate-90" aria-hidden="true" />
+            {h.developers.show}
+          </summary>
+          <pre className="mt-3 overflow-x-auto rounded-2xl border bg-card p-4 font-mono text-xs leading-relaxed sm:text-sm">
+            <code>{h.developers.code}</code>
+          </pre>
+        </details>
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
           <li>
             <a href={REPO_URL} className="inline-flex min-h-11 items-center text-primary-ink underline underline-offset-4">
@@ -232,14 +233,12 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
         <h2 id="cta-title" className="text-3xl font-extrabold tracking-display">
           {h.cta.title}
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{h.cta.body}</p>
         <Button asChild size="lg" className="mt-7">
           <Link href={href(locale, "/app")}>
             {h.cta.button}
             <ArrowRightIcon aria-hidden="true" />
           </Link>
         </Button>
-        <p className="mt-4 text-xs text-muted-foreground">{dict.common.disclaimer}</p>
       </section>
     </>
   )

@@ -64,7 +64,7 @@ Rules the demo enforces:
 - Interest is simple interest on the outstanding principal, per second; repayments pay interest first.
 - After the due date there is a 3-day grace period; then the loan is liquidated like a price liquidation: the liquidator repays the debt and receives collateral worth the debt plus 5%, and the rest comes back to the borrower.
 
-The **Demo controls** (in the app strip) toggle a slow network, force the next transaction to fail, add test stablecoins, and **Reset demo**.
+The **Demo controls** (the "Sepolia testnet" pill beside each app page title) toggle a slow network, force the next transaction to fail, add test stablecoins, and **Reset demo**.
 
 ## Project structure
 
@@ -76,7 +76,7 @@ src/
     sitemap.ts robots.ts icon.svg
   proxy.ts               redirects / to the visitor's language
   components/
-    site/                standard Monark header, footer, pairing, locale and theme switches
+    site/                standard Monark header (brand, Demo chip), footer, locale and theme switches
     loan/                safety runway, padlock, risk badge (shared by site and app)
     home/                hero loan card
     demo/                the interactive app (wizard, dashboard, dialogs, wallet prompt, tx feedback)

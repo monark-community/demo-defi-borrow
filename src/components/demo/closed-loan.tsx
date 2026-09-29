@@ -2,7 +2,6 @@
 
 import { ArrowRightIcon, CheckCircle2Icon, CircleAlertIcon, UnlockIcon } from "lucide-react"
 import Link from "next/link"
-import { toast } from "sonner"
 
 import { Padlock } from "@/components/loan/padlock"
 import { Button } from "@/components/ui/button"
@@ -16,13 +15,12 @@ import { formatToken, formatUsd } from "@/lib/format"
 
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { LoanActivity } from "./loan-activity"
 import { TxFeedback } from "./tx-feedback"
 
 /** A repaid or liquidated loan: what happened, then take the collateral back and start again. */
 export function ClosedLoan({ loan }: { loan: Loan }) {
-  const { app, locale, disclaimer } = useAppCopy()
+  const { app, locale } = useAppCopy()
   const c = app.closed
   const tx = useTx()
   const liquidated = loan.status === "liquidated"
@@ -33,7 +31,8 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
 
   const withdraw = async () => {
     const amount = collText
-    const ok = await tx.run(
+    // The card itself confirms it ("Collateral withdrawn to your wallet."), so no toast.
+    await tx.run(
       {
         title: t(app.summaries.withdraw, { amount }),
         rows: [{ label: app.summaries.rows.receiveBack, value: amount }],
@@ -41,7 +40,6 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
       },
       (hash) => withdrawCollateral(hash)
     )
-    if (ok) toast.success(t(c.withdrawDone, { amount }))
   }
 
   return (
@@ -98,7 +96,6 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
                 </Button>
               </div>
               <TxFeedback state={tx.state} onRetry={() => void withdraw()} onDismiss={tx.reset} />
-              <Disclaimer text={disclaimer} />
             </>
           ) : (
             <p className="inline-flex items-center gap-2 text-sm font-semibold">

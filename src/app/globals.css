@@ -166,28 +166,49 @@
   }
 }
 
-/* Flowing stream along a split line. */
-@keyframes sf-flow {
-  to {
-    stroke-dashoffset: -48;
-  }
-}
-.sf-flowing {
-  stroke-dasharray: 10 14;
-  animation: sf-flow 0.9s linear infinite;
-}
-@keyframes sf-stamp {
+/* BorrowX motion: each animation explains a state change. */
+@keyframes bx-stamp {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.85);
   }
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
-.sf-stamp {
-  animation: sf-stamp 200ms ease-out both;
+.bx-stamp {
+  animation: bx-stamp 220ms ease-out both;
+}
+@keyframes bx-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.bx-drop {
+  animation: bx-drop 600ms ease-out both;
+}
+@keyframes bx-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.bx-pulse {
+  animation: bx-pulse 1.4s ease-in-out infinite;
+}
+/* Live-moving runway markers glide instead of jumping. */
+.bx-glide {
+  transition:
+    left 250ms ease-out,
+    width 250ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

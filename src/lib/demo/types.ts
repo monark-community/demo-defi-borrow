@@ -1,6 +1,6 @@
 /**
  * Domain types for the BorrowX demo. Everything the UI knows about the
- * wallet, the market and the borrower's loan goes through these shapes, so
+ * wallet, the market and the borrower's loans go through these shapes, so
  * the simulated layer in this folder could be replaced by wagmi/viem calls
  * (and a real oracle) without touching UI code.
  *
@@ -143,13 +143,13 @@ export interface DemoSettings {
 }
 
 export interface DemoState {
-  version: 1
+  version: 2
   wallet: WalletState
   market: MarketState
-  /** The current loan: active, or closed but not yet archived. */
-  loan: Loan | null
-  /** Pending automatic liquidation of the current loan. */
-  keeper: KeeperJob | null
+  /** Open loans, plus closed ones not yet filed under history. Oldest first. */
+  loans: Loan[]
+  /** Pending automatic liquidations, by loan id. */
+  keepers: Record<string, KeeperJob>
   /** Archived loans, newest first. */
   history: Loan[]
   borrower: BorrowerRecord

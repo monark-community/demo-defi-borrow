@@ -1,6 +1,6 @@
 # BorrowX by Monark
 
-**Borrow against your crypto, with eyes open.** BorrowX is the borrower's side of the Monark DeFi demos: a guided, one-loan-at-a-time experience that shows what you lock, what you receive, the price that would put your collateral at risk, and what you owe right now.
+**Borrow against your crypto, with eyes open.** BorrowX is the borrower's side of the Monark DeFi demos: a guided experience across your loans that shows what you lock, what you receive, the price that would put your collateral at risk, and what you owe right now.
 
 It is a testnet reference implementation for Monark's community of students, developers, ambassadors and partners. Everything runs on a **simulated testnet** in the browser: no real chain, wallet, funds or backend.
 
@@ -14,9 +14,10 @@ It is a testnet reference implementation for Monark's community of students, dev
 
 1. **Connect** the demo wallet (sign or reject a sign-in message).
 2. **Request a loan** in four steps: what you need (tUSDC or tDAI), what you lock (tETH, tWBTC or tLINK, with a suggested safe amount), your terms (30/90/180 days, fixed or variable), then review and sign two transactions (allowance, then lock and borrow).
-3. **Track it**: the amount owed ticks up every second, the safety runway shows the liquidation price, the repayment path shows the due date and grace period.
+3. **Track it**: the overview sums up every open loan (total owed, lowest health, next due date) with a card per loan; each loan's page shows the amount owed ticking up every second, the safety runway with its liquidation price, and the repayment path with the due date and grace period.
 4. **Repay** in part or in full, then withdraw your collateral.
-5. **Move the market** or skip ahead in time and watch the loan become at risk, get rescued with more collateral, or get liquidated automatically.
+5. **Move the market** from the strip under the title ("Simulate the market") or skip ahead in time, and watch loans become at risk, get rescued with more collateral, or get liquidated automatically. One price move hits every loan that uses that collateral.
+6. **Hold several loans**: "Explore a running example" loads three, and "New loan" opens another beside them.
 
 ## Run it locally
 
@@ -53,8 +54,9 @@ All mock data and behaviour live in a small typed data layer, `src/lib/demo/`. U
 | `store.ts` | External store persisted to `localStorage` (every access in try/catch), the demo clock, and the wallet-prompt promise. |
 | `chain.ts` | `useTx()`: wallet prompt → pending with a hash (1.2–2.4 s, or 3–6 s on "slow network") → confirmed or failed. |
 | `wallet.ts` | Simulated connection (sign-in message, reject path). |
-| `ops.ts` | Every state change: approve, open, repay, add collateral, withdraw, archive, market moves, time skips, and the keeper that liquidates a loan below health 1.00 or past its grace period. |
-| `seed.ts` | The example wallet (Sam Rivera), a past repaid loan, and the "running example" loan. |
+| `ops.ts` | Every state change, by loan id: approve, open, repay, add collateral, withdraw, archive, market moves, time skips, and the per-loan keeper that liquidates a loan below health 1.00 or past its grace period. |
+| `portfolio.ts` | Views across loans: totals, the weakest loan, the next due, collateral locked per token. |
+| `seed.ts` | The example wallet (Sam Rivera), a past repaid loan, and the three "running example" loans. |
 
 Rules the demo enforces:
 
@@ -71,7 +73,7 @@ The **Demo controls** (the "Sepolia testnet" pill beside each app page title) to
 ```
 src/
   app/
-    [locale]/            en and fr routes: home, how-it-works, credits, pricing (unlinked), app/, app/borrow/, 404, error, OG image
+    [locale]/            en and fr routes: home, how-it-works, credits, pricing (unlinked), app/, app/borrow/, app/loan/[id]/, 404, error, OG image
     globals.css          Monark 2026 tokens (cream / espresso), motion
     sitemap.ts robots.ts icon.svg
   proxy.ts               redirects / to the visitor's language
@@ -79,7 +81,7 @@ src/
     site/                standard Monark header (brand, Demo chip), footer, locale and theme switches
     loan/                safety runway, padlock, risk badge (shared by site and app)
     home/                hero loan card
-    demo/                the interactive app (wizard, dashboard, dialogs, wallet prompt, tx feedback)
+    demo/                the interactive app (overview, loan page, market strip, wizard, dialogs, wallet prompt, tx feedback)
     ui/                  shadcn/ui and @monark registry components (wallet, connect-wallet, token-amount, network-badge, tx-status)
   i18n/                  typed EN/FR dictionaries
   lib/demo/              simulated chain, wallet and loan (see above)

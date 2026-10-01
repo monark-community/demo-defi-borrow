@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
 
 import { createSeed } from "./seed"
-import type { DemoSettings, DemoState, TxSummary, WalletState } from "./types"
+import type { DemoSettings, DemoState, Loan, TxSummary, WalletState } from "./types"
 
 /**
  * The demo's single source of truth: a tiny external store persisted to
@@ -32,14 +32,32 @@ function persist() {
   }
 }
 
+/** Version 1 held a single `loan` and `keeper`; version 2 holds a list of loans. */
+interface DemoStateV1 extends Omit<DemoState, "version" | "loans" | "keepers"> {
+  version: 1
+  loan: Loan | null
+}
+
+function migrate(parsed: DemoState | DemoStateV1): DemoState | null {
+  if (parsed?.version === 1) {
+    const { loan, ...rest } = parsed
+    // A pending liquidation is dropped: checkTerms re-detects it on load.
+    return { ...rest, version: 2, loans: loan ? [loan] : [], keepers: {} } as DemoState
+  }
+  if (parsed?.version === 2 && Array.isArray(parsed.loans)) return { ...parsed, keepers: parsed.keepers ?? {} }
+  return null
+}
+
 function load(): DemoState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as DemoState
-    if (parsed?.version !== 1 || !parsed.wallet || !Array.isArray(parsed.history)) return null
+    const parsed = migrate(JSON.parse(raw) as DemoState | DemoStateV1)
+    if (!parsed || !parsed.wallet || !Array.isArray(parsed.history)) return null
     // A reload never resumes a half-finished connection.
     if (parsed.wallet.status === "connecting") parsed.wallet.status = "disconnected"
+    // Nor a liquidation that was mid-flight: checkTerms starts it again.
+    parsed.keepers = {}
     return parsed
   } catch {
     storageOk = false

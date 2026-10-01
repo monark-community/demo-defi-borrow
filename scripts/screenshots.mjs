@@ -20,7 +20,9 @@ const L = {
     connect: "Connect demo wallet",
     confirm: "Confirm",
     reject: "Reject",
-    yourLoan: "Your loan",
+    yourLoans: "Your loans",
+    loanTitle: /against/,
+    simulate: "Simulate the market",
     request: "Request a loan",
     cont: "Continue",
     amount: "Amount",
@@ -38,7 +40,9 @@ const L = {
     connect: "Connecter le portefeuille de démo",
     confirm: "Confirmer",
     reject: "Refuser",
-    yourLoan: "Votre prêt",
+    yourLoans: "Vos prêts",
+    loanTitle: /contre/,
+    simulate: "Simuler le marché",
     request: "Demander un prêt",
     cont: "Continuer",
     amount: "Montant",
@@ -101,7 +105,7 @@ async function connect(page, v, capture) {
   await prompt(page).waitFor()
   if (capture) await shot(page, v, "flow1-connect-prompt")
   await confirmPrompt(page, t)
-  await page.getByRole("heading", { level: 1, name: t.yourLoan, exact: true }).waitFor({ timeout: 10000 })
+  await page.getByRole("heading", { level: 1, name: t.yourLoans, exact: true }).waitFor({ timeout: 10000 })
 }
 
 async function marketing(page, v) {
@@ -165,7 +169,7 @@ async function requestLoan(page, v, capture) {
   await page.getByRole("link", { name: t.goLoan }).waitFor({ timeout: 10000 })
   if (capture) await shot(page, v, "flow2-opened", true)
   await page.getByRole("link", { name: t.goLoan }).click()
-  await page.getByRole("heading", { level: 1, name: t.yourLoan, exact: true }).waitFor()
+  await page.getByRole("heading", { level: 1, name: t.loanTitle }).waitFor()
   await page.waitForTimeout(500)
   await shot(page, v, "app-03-active-loan", true)
 }
@@ -189,7 +193,7 @@ async function appFlows(page, v) {
     await shot(page, v, "flow1-connect-rejected")
     await page.getByRole("main").getByRole("button", { name: t.connect }).click()
     await confirmPrompt(page, t)
-    await page.getByRole("heading", { level: 1, name: t.yourLoan, exact: true }).waitFor()
+    await page.getByRole("heading", { level: 1, name: t.yourLoans, exact: true }).waitFor()
   }
 
   // Flow 2: request a loan
@@ -216,12 +220,20 @@ async function appFlows(page, v) {
   await confirmPrompt(page, t)
   await page.getByText("Collateral withdrawn to your wallet.").waitFor({ timeout: 10000 })
   await shot(page, v, "flow3-withdrawn")
-  await page.getByRole("button", { name: "Start a new loan" }).click()
+  await page.getByRole("button", { name: "Move to history" }).click()
+  await page.getByRole("heading", { level: 1, name: t.yourLoans, exact: true }).waitFor()
 
-  // Flow 4: price drop, then rescue with collateral (running example)
+  // Flow 4: several loans; one tETH drop hits both tETH loans, then rescue one with collateral
   await page.getByRole("button", { name: "Explore a running example" }).click()
-  await page.getByRole("heading", { name: "Try it: move the market" }).waitFor()
+  await page.getByRole("link", { name: "2,000 tUSDC against tETH" }).first().waitFor()
+  await page.waitForTimeout(500)
+  await shot(page, v, "app-04-overview", true)
+  await page.getByRole("button", { name: t.simulate }).click()
+  await page.getByRole("radio", { name: "tETH" }).click()
   await page.getByRole("button", { name: /25\s?%/ }).click()
+  await page.waitForTimeout(600)
+  await shot(page, v, "flow4-overview-price-drop", true)
+  await page.getByRole("link", { name: "2,000 tUSDC against tETH" }).first().click()
   await page.getByText("Your loan is at risk").waitFor()
   await page.evaluate(() => window.scrollTo(0, 0))
   await shot(page, v, "flow4-at-risk", true)
@@ -235,9 +247,9 @@ async function appFlows(page, v) {
   await page.evaluate(() => window.scrollTo(0, 0))
   await shot(page, v, "flow4-rescued", true)
 
-  // Flow 5: a crash, automatic liquidation (price slider down about $1,000, below the liquidation price)
+  // Flow 5: a crash, automatic liquidation (price slider down to its floor, well below the liquidation price)
   await page.getByRole("slider").focus()
-  for (let i = 0; i < 10; i++) await page.keyboard.press("PageDown")
+  await page.keyboard.press("Home")
   await page.getByText(/A liquidator is closing your loan/).waitFor()
   await page.evaluate(() => window.scrollTo(0, 0))
   await shot(page, v, "flow5-liquidating")

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowDownIcon, CircleAlertIcon, ClockIcon, Loader2Icon, TriangleAlertIcon } from "lucide-react"
+import { CircleAlertIcon, ClockIcon, Loader2Icon, TriangleAlertIcon } from "lucide-react"
 
 import { Padlock } from "@/components/loan/padlock"
 import { RiskBadge } from "@/components/loan/risk-badge"
@@ -19,21 +19,25 @@ import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
 import { LoanActivity } from "./loan-activity"
 import { LoanDetails } from "./loan-details"
-import { MarketPanel } from "./market-panel"
 import { RepayDialog } from "./repay-dialog"
 import { RepaymentPath } from "./repayment-path"
 
+/**
+ * One open loan. The two things that matter lead, side by side: what you
+ * owe (with the actions) and how safe the loan is. Its timeline follows,
+ * then the terms and the transaction log. The market simulator lives in
+ * the strip above the page, not in the loan's layout.
+ */
 export function ActiveLoan({ loan }: { loan: Loan }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-start">
-      <div className="flex min-w-0 flex-col gap-6">
-        <LoanBanner loan={loan} />
+    <div className="flex flex-col gap-6">
+      <LoanBanner loan={loan} />
+      <div className="grid gap-6 lg:grid-cols-2">
         <OweCard loan={loan} />
         <HealthCard loan={loan} />
-        <RepaymentPath loan={loan} />
       </div>
-      <div className="flex min-w-0 flex-col gap-6">
-        <MarketPanel loan={loan} />
+      <RepaymentPath loan={loan} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] lg:items-start">
         <LoanDetails loan={loan} />
         <LoanActivity loan={loan} />
       </div>
@@ -50,15 +54,16 @@ function LoanBanner({ loan }: { loan: Loan }) {
   if (!demo) return null
   const pos = positionOf(loan, demo.market, now)
   const price = formatUsd(pos.liqPrice, locale)
+  const keeper = demo.keepers[loan.id]
 
-  if (demo.keeper) {
+  if (keeper) {
     return (
       <div role="status" aria-live="polite" className="flex flex-col gap-3 rounded-2xl border border-destructive/50 bg-destructive/10 p-4">
         <p className="flex items-start gap-2 font-semibold">
           <Loader2Icon className="mt-0.5 size-4 shrink-0 animate-spin text-destructive" aria-hidden="true" />
-          {demo.keeper.reason === "term" ? b.keeperTerm : t(b.keeperPrice, { token: loan.collateralSymbol, price })}
+          {keeper.reason === "term" ? b.keeperTerm : t(b.keeperPrice, { token: loan.collateralSymbol, price })}
         </p>
-        <TxStatus status="pending" hash={demo.keeper.hash} label={app.tx.pending} className="self-start" />
+        <TxStatus status="pending" hash={keeper.hash} label={app.tx.pending} className="self-start" />
       </div>
     )
   }
@@ -102,11 +107,11 @@ function OweCard({ loan }: { loan: Loan }) {
   const pos = positionOf(loan, demo.market, now)
   const interest = pos.owed - loan.outstanding
   const days = daysBetween(now, loan.dueAt)
-  const busy = !!demo.keeper
+  const busy = !!demo.keepers[loan.id]
   const dueText = days > 0 ? t(o.inDays, { n: days }) : days === 0 ? o.dueToday : t(o.overdue, { n: -days })
 
   return (
-    <section aria-labelledby="owe-title" className="rounded-3xl border bg-card p-5 sm:p-6">
+    <section aria-labelledby="owe-title" className="flex flex-col rounded-3xl border bg-card p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="owe-title" className="eyebrow text-muted-foreground">
           {o.title}
@@ -124,7 +129,7 @@ function OweCard({ loan }: { loan: Loan }) {
         <span className="bx-pulse size-2 rounded-full bg-primary" aria-hidden="true" />
         {o.live}
       </p>
-      <dl className="mt-5 grid grid-cols-2 gap-4 border-t pt-4 text-sm">
+      <dl className="mt-5 mb-5 grid grid-cols-2 gap-4 border-t pt-4 text-sm">
         <div>
           <dt className="text-muted-foreground">{o.principal}</dt>
           <dd className="mt-1 font-semibold">
@@ -138,7 +143,7 @@ function OweCard({ loan }: { loan: Loan }) {
           </dd>
         </div>
       </dl>
-      <div className="mt-5 flex flex-col gap-3 border-t pt-5">
+      <div className="mt-auto flex flex-col gap-3 border-t pt-5">
         <div className="flex flex-col gap-2 sm:flex-row">
           <RepayDialog loan={loan} disabled={busy} />
           <AddCollateralDialog loan={loan} disabled={busy} />
@@ -195,10 +200,6 @@ function HealthCard({ loan }: { loan: Loan }) {
           </dd>
         </div>
       </dl>
-      <a href="#market-title" className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary-ink underline underline-offset-4 lg:hidden">
-        <ArrowDownIcon className="size-4" aria-hidden="true" />
-        {app.market.title}
-      </a>
     </section>
   )
 }

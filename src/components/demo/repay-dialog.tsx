@@ -74,7 +74,7 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
         ],
         movesValue: true,
       },
-      (hash) => repay(full ? "full" : pay, hash)
+      (hash) => repay(loan.id, full ? "full" : pay, hash)
     )
     if (ok) {
       setOpen(false)

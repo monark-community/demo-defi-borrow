@@ -1,7 +1,8 @@
 "use client"
 
-import { ArrowRightIcon, CheckCircle2Icon, CircleAlertIcon, UnlockIcon } from "lucide-react"
+import { ArchiveIcon, CheckCircle2Icon, CircleAlertIcon, UnlockIcon } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { Padlock } from "@/components/loan/padlock"
 import { Button } from "@/components/ui/button"
@@ -18,15 +19,20 @@ import { useAppCopy } from "./app-provider"
 import { LoanActivity } from "./loan-activity"
 import { TxFeedback } from "./tx-feedback"
 
-/** A repaid or liquidated loan: what happened, then take the collateral back and start again. */
-export function ClosedLoan({ loan }: { loan: Loan }) {
+/**
+ * A repaid or liquidated loan: what happened, then take the collateral back
+ * and move the loan to history. `archived` loans (already in history) are
+ * read-only.
+ */
+export function ClosedLoan({ loan, archived = false }: { loan: Loan; archived?: boolean }) {
   const { app, locale } = useAppCopy()
+  const router = useRouter()
   const c = app.closed
   const tx = useTx()
   const liquidated = loan.status === "liquidated"
   const repaidEvent = loan.events.find((e) => e.kind === "repaidFull")
   const withdrawn = loan.events.some((e) => e.kind === "withdrawn")
-  const canStart = loan.withdrawable <= 0
+  const canArchive = loan.withdrawable <= 0
   const collText = formatToken(loan.withdrawable, loan.collateralSymbol, locale)
 
   const withdraw = async () => {
@@ -38,7 +44,7 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
         rows: [{ label: app.summaries.rows.receiveBack, value: amount }],
         movesValue: true,
       },
-      (hash) => withdrawCollateral(hash)
+      (hash) => withdrawCollateral(loan.id, hash)
     )
   }
 
@@ -86,6 +92,7 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
 
         {liquidated && loan.liquidation ? <Breakdown loan={loan} /> : null}
 
+        {archived ? null : (
         <div className="mt-6 flex flex-col gap-3 border-t pt-5">
           {loan.withdrawable > 0 ? (
             <>
@@ -104,9 +111,17 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
             </p>
           )}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button size="lg" variant={canStart ? "default" : "outline"} disabled={!canStart} onClick={() => archiveLoan()}>
-              {c.startNew}
-              <ArrowRightIcon aria-hidden="true" />
+            <Button
+              size="lg"
+              variant={canArchive ? "default" : "outline"}
+              disabled={!canArchive}
+              onClick={() => {
+                archiveLoan(loan.id)
+                router.push(href(locale, "/app"))
+              }}
+            >
+              <ArchiveIcon aria-hidden="true" />
+              {c.archive}
             </Button>
             {liquidated ? (
               <Button asChild variant="link">
@@ -114,8 +129,9 @@ export function ClosedLoan({ loan }: { loan: Loan }) {
               </Button>
             ) : null}
           </div>
-          {!canStart ? <p className="text-xs text-muted-foreground">{c.withdrawFirst}</p> : null}
+          {!canArchive ? <p className="text-xs text-muted-foreground">{c.withdrawFirst}</p> : null}
         </div>
+        )}
       </section>
       <LoanActivity loan={loan} />
     </div>

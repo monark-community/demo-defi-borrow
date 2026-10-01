@@ -57,24 +57,12 @@ export function BorrowWizard() {
   const [rateKind, setRateKind] = useState<RateKind>("variable")
   const [ack, setAck] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
-  const [opened, setOpened] = useState(false)
+  /** The new loan's id, once its transaction confirms. */
+  const [opened, setOpened] = useState<string | null>(null)
   const approveTx = useTx()
   const openTx = useTx()
 
   if (!demo) return null
-
-  if (demo.loan && !opened) {
-    return (
-      <section className="mx-auto flex max-w-lg flex-col items-center py-10 text-center">
-        <Padlock locked className="h-24 w-20" />
-        <h1 className="mt-6 text-3xl font-extrabold tracking-display">{b.hasLoan.title}</h1>
-        <p className="mt-3 text-muted-foreground">{b.hasLoan.body}</p>
-        <Button asChild size="lg" className="mt-8">
-          <Link href={href(locale, "/app")}>{b.hasLoan.cta}</Link>
-        </Button>
-      </section>
-    )
-  }
 
   const level = borrowerLevel(demo.borrower)
   const discount = levelDiscount(level)
@@ -165,21 +153,20 @@ export function BorrowWizard() {
         movesValue: true,
       },
       (hash) => {
-        setOpened(true)
-        openLoan({ borrowSymbol, amount, collateralSymbol, collateral, rateKind, termDays }, hash)
+        setOpened(openLoan({ borrowSymbol, amount, collateralSymbol, collateral, rateKind, termDays }, hash))
       }
     )
     if (!ok) return
   }
 
-  const done = opened && openTx.state.phase === "confirmed"
+  const done = opened !== null && openTx.state.phase === "confirmed"
 
   return (
     <div className="flex flex-col gap-8">
       <header>
         <Link href={href(locale, "/app")} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground">
           <ArrowLeftIcon className="size-4" aria-hidden="true" />
-          {app.loan.title}
+          {app.loans.title}
         </Link>
         <AppHeader className="mt-1">
           <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{b.title}</h1>
@@ -382,7 +369,7 @@ export function BorrowWizard() {
                   </div>
                   <p className="text-muted-foreground">{t(b.review.doneBody, { amount: amountLabel, collateral: collLabel })}</p>
                   <Button asChild size="lg">
-                    <Link href={href(locale, "/app")}>
+                    <Link href={href(locale, opened ? `/app/loan/${opened}` : "/app")}>
                       {b.review.view}
                       <ArrowRightIcon aria-hidden="true" />
                     </Link>

@@ -1,48 +1,136 @@
 "use client"
 
-import { ArrowRightIcon, PlayIcon } from "lucide-react"
+import { ArrowRightIcon, PlayIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
+import type { ReactNode } from "react"
 
 import { Padlock } from "@/components/loan/padlock"
+import { RiskBadge } from "@/components/loan/risk-badge"
 import { Button } from "@/components/ui/button"
 import { InfoTip } from "@/components/ui/info-tip"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
-import { borrowerLevel } from "@/lib/demo/loan-math"
+import { borrowerLevel, daysBetween } from "@/lib/demo/loan-math"
 import { loadExample } from "@/lib/demo/ops"
-import { useDemo } from "@/lib/demo/store"
+import { lockedBySymbol, portfolioOf, type Portfolio } from "@/lib/demo/portfolio"
+import { useDemo, useDemoNow } from "@/lib/demo/store"
 import { TOKENS } from "@/lib/demo/tokens"
-import type { Loan, TokenSymbol } from "@/lib/demo/types"
-import { formatDate, formatToken } from "@/lib/format"
+import type { CollateralSymbol, Loan, TokenSymbol } from "@/lib/demo/types"
+import { formatDate, formatHealth, formatToken, formatUsd } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-import { ActiveLoan } from "./active-loan"
 import { Amount } from "./amount"
 import { AppHeader } from "./app-header"
 import { useAppCopy } from "./app-provider"
-import { ClosedLoan } from "./closed-loan"
+import { ClosedLoanCard, LoanCard, useLoanName } from "./loan-card"
+import { MarketStrip } from "./market-strip"
 
-/** /app: the visitor's one loan (none, active or closed), then wallet, level and history. */
+/** /app: every loan at a glance (or the empty state), then wallet, level and history. */
 export function LoanHome() {
   const demo = useDemo()
-  const { app } = useAppCopy()
+  const now = useDemoNow(1000)
+  const { app, locale } = useAppCopy()
   if (!demo) return null
-  const loan = demo.loan
+  const pf = portfolioOf(demo, now)
+  const any = pf.open.length + pf.closed.length > 0
 
   return (
-    <div className="flex flex-col gap-8">
-      <AppHeader>
-        <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{app.loan.title}</h1>
+    <div className="flex flex-col gap-6">
+      <AppHeader
+        actions={
+          any ? (
+            <Button asChild size="sm">
+              <Link href={href(locale, "/app/borrow")}>
+                <PlusIcon aria-hidden="true" />
+                {app.loans.request}
+              </Link>
+            </Button>
+          ) : null
+        }
+      >
+        <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{app.loans.title}</h1>
       </AppHeader>
 
-      {!loan ? <EmptyLoan /> : loan.status === "active" ? <ActiveLoan loan={loan} /> : <ClosedLoan loan={loan} />}
+      <MarketStrip focus={pf.weakest?.loan.collateralSymbol} />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {!any ? (
+        <EmptyLoan />
+      ) : (
+        <>
+          {pf.open.length > 0 ? <PortfolioSummary pf={pf} /> : null}
+          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {pf.open.map(({ loan, pos }) => (
+              <li key={loan.id} className="flex *:flex-1">
+                <LoanCard loan={loan} pos={pos} />
+              </li>
+            ))}
+            {pf.closed.map((loan) => (
+              <li key={loan.id} className="flex *:flex-1">
+                <ClosedLoanCard loan={loan} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <div className="mt-2 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <WalletCard />
         <LevelCard />
         <HistoryCard />
       </div>
     </div>
+  )
+}
+
+/** Totals across open loans, and which loan to look at first. */
+function PortfolioSummary({ pf }: { pf: Portfolio }) {
+  const now = useDemoNow(60_000)
+  const { app, terms, locale } = useAppCopy()
+  const name = useLoanName()
+  const s = app.loans.summary
+  const o = app.owe
+  const n = pf.open.length
+  const days = pf.nextDue ? daysBetween(now, pf.nextDue.loan.dueAt) : 0
+  const dueText = days > 0 ? t(o.inDays, { n: days }) : days === 0 ? o.dueToday : t(o.overdue, { n: -days })
+  const cells: { label: string; value: string; badge?: ReactNode; hint?: string }[] = [
+    { label: s.owed, value: formatUsd(pf.owedUsd, locale), hint: n === 1 ? s.owedHintOne : t(s.owedHint, { n }) },
+    { label: s.locked, value: formatUsd(pf.collateralUsd, locale) },
+  ]
+  if (pf.weakest) {
+    cells.push({
+      label: s.weakest,
+      value: formatHealth(pf.weakest.pos.health, locale),
+      badge: <RiskBadge risk={pf.weakest.pos.risk} label={terms.risk[pf.weakest.pos.risk]} />,
+      hint: name(pf.weakest.loan),
+    })
+  }
+  if (pf.nextDue) {
+    cells.push({ label: s.nextDue, value: formatDate(pf.nextDue.loan.dueAt, locale), hint: `${name(pf.nextDue.loan)} · ${dueText}` })
+  }
+
+  return (
+    <section aria-label={s.title} className="rounded-3xl border bg-card">
+      <dl className="grid grid-cols-2 lg:grid-cols-4">
+        {cells.map((c, i) => (
+          <div
+            key={c.label}
+            className={cn(
+              "flex min-w-0 flex-col gap-1 p-4 sm:p-5",
+              i % 2 === 1 && "border-l",
+              i >= 2 && "border-t lg:border-t-0",
+              i === 2 && "lg:border-l"
+            )}
+          >
+            <dt className="eyebrow text-muted-foreground">{c.label}</dt>
+            <dd className="flex flex-wrap items-center gap-2 text-xl font-bold tabular-nums sm:text-2xl">
+              {c.value}
+              {c.badge}
+            </dd>
+            {c.hint ? <dd className="truncate text-xs text-muted-foreground">{c.hint}</dd> : null}
+          </div>
+        ))}
+      </dl>
+    </section>
   )
 }
 
@@ -80,7 +168,7 @@ function WalletCard() {
   const demo = useDemo()
   const { app, locale } = useAppCopy()
   if (!demo) return null
-  const loan = demo.loan
+  const locked = lockedBySymbol(demo.loans)
   return (
     <section aria-labelledby="wallet-title" className="rounded-3xl border bg-card p-5 sm:p-6">
       <h2 id="wallet-title" className="eyebrow text-muted-foreground">
@@ -88,7 +176,7 @@ function WalletCard() {
       </h2>
       <ul className="mt-3 flex flex-col divide-y">
         {ORDER.map((sym) => {
-          const locked = loan?.status === "active" && loan.collateralSymbol === sym ? loan.collateral : 0
+          const lockedHere = sym in locked ? locked[sym as CollateralSymbol] : 0
           return (
             <li key={sym} className="flex items-center justify-between gap-3 py-2.5">
               <span className="inline-flex items-center gap-2 text-sm font-bold">
@@ -97,8 +185,8 @@ function WalletCard() {
               </span>
               <span className="text-right text-sm">
                 <Amount value={demo.wallet.balances[sym]} symbol={sym} usd={demo.wallet.balances[sym] * demo.market.prices[sym]} />
-                {locked > 0 ? (
-                  <span className="block text-xs text-primary-ink">{t(app.balances.locked, { amount: formatToken(locked, sym, locale) })}</span>
+                {lockedHere > 0 ? (
+                  <span className="block text-xs text-primary-ink">{t(app.balances.locked, { amount: formatToken(lockedHere, sym, locale) })}</span>
                 ) : null}
               </span>
             </li>
@@ -188,12 +276,12 @@ function HistoryRow({ loan, locale }: { loan: Loan; locale: "en" | "fr" }) {
   return (
     <li className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-bold">
+        <Link href={href(locale, `/app/loan/${loan.id}`)} className="text-sm font-bold underline-offset-4 hover:underline">
           {t(h.row, {
             amount: formatToken(loan.principal, loan.borrowSymbol, locale),
             collateral: loan.collateralSymbol,
           })}
-        </span>
+        </Link>
         <span
           className={cn(
             "rounded-full border px-2 py-0.5 text-xs font-bold",

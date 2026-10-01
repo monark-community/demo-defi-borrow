@@ -69,7 +69,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
           rows: [{ label: app.summaries.rows.spender, value: app.summaries.rows.contract }],
           movesValue: false,
         },
-        (hash) => approveCollateral(sym, parsed, hash)
+        (hash) => approveCollateral(sym, parsed, hash, loan.id)
       )
       if (!ok) return
     }
@@ -82,7 +82,7 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
         ],
         movesValue: true,
       },
-      (hash) => addCollateral(parsed, hash)
+      (hash) => addCollateral(loan.id, parsed, hash)
     )
     if (ok) {
       setOpen(false)

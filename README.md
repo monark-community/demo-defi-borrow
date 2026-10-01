@@ -1,73 +1,100 @@
-# Welcome to your Lovable project
+# BorrowX by Monark
 
-## Project info
+**Borrow against your crypto, with eyes open.** BorrowX is the borrower's side of the Monark DeFi demos: a guided, one-loan-at-a-time experience that shows what you lock, what you receive, the price that would put your collateral at risk, and what you owe right now.
 
-**URL**: https://lovable.dev/projects/390b0e94-1568-4b4b-86bc-124b32f7435a
+It is a testnet reference implementation for Monark's community of students, developers, ambassadors and partners. Everything runs on a **simulated testnet** in the browser: no real chain, wallet, funds or backend.
 
-## How can I edit this code?
+- Project brief: https://www.monark.io/en/project/defi-borrow
+- Sibling demos: [Fluidswap](https://fluidswap.monark.io/) (trading), [Yieldmine](https://yieldmine.monark.io/) (lending for yield), [VaultLend](https://vaultlend.monark.io/) (protocol risk)
+- Site plan: [`docs/site-plan.md`](docs/site-plan.md) · Assets and credits: [`docs/assets.md`](docs/assets.md)
 
-There are several ways of editing your application.
+> Testnet demo · not financial advice · no real funds
 
-**Use Lovable**
+## What you can do in the demo
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/390b0e94-1568-4b4b-86bc-124b32f7435a) and start prompting.
+1. **Connect** the demo wallet (sign or reject a sign-in message).
+2. **Request a loan** in four steps: what you need (tUSDC or tDAI), what you lock (tETH, tWBTC or tLINK, with a suggested safe amount), your terms (30/90/180 days, fixed or variable), then review and sign two transactions (allowance, then lock and borrow).
+3. **Track it**: the amount owed ticks up every second, the safety runway shows the liquidation price, the repayment path shows the due date and grace period.
+4. **Repay** in part or in full, then withdraw your collateral.
+5. **Move the market** or skip ahead in time and watch the loan become at risk, get rescued with more collateral, or get liquidated automatically.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Run it locally
 
-**Use your preferred IDE**
+Requirements: Node 22 and pnpm 10.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+pnpm install
+pnpm dev            # http://localhost:3000
 ```
 
-**Edit a file directly in GitHub**
+Other scripts:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+pnpm lint           # ESLint (next/core-web-vitals + TypeScript)
+pnpm typecheck      # next typegen && tsc --noEmit
+pnpm build          # production build (every page prerenders)
+pnpm start          # serve the production build
+pnpm screenshots    # Playwright screenshots of every page and flow (needs a running server, see below)
+```
 
-**Use GitHub Codespaces**
+`BASE_URL=http://localhost:3000 pnpm screenshots` writes to `docs/screenshots/<locale>-<width>-<theme>-<name>.png` (390px and 1440px, light and dark, plus French). Install the browser once with `pnpm exec playwright install chromium`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+No environment variables are needed. `NEXT_PUBLIC_SITE_URL` optionally overrides the canonical URL (default `https://borrowx.monark.io`).
 
-## What technologies are used for this project?
+## How the simulation works
 
-This project is built with:
+All mock data and behaviour live in a small typed data layer, `src/lib/demo/`. UI components only call its hooks and operations, so it can be replaced by wagmi/viem and a real contract without touching the UI.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+| File | Role |
+|-|-|
+| `types.ts` | Domain types: loan, events, wallet, market, keeper job, transaction states. |
+| `tokens.ts` | The shared Monark DeFi testnet tokens and reference prices (tETH $3,200, tWBTC $64,000, tUSDC $1, tDAI $1, tLINK $14.50), collateral parameters, rates. |
+| `loan-math.ts` | Pure maths: health factor, liquidation price, simple interest, liquidation breakdown, borrower levels. |
+| `store.ts` | External store persisted to `localStorage` (every access in try/catch), the demo clock, and the wallet-prompt promise. |
+| `chain.ts` | `useTx()`: wallet prompt → pending with a hash (1.2–2.4 s, or 3–6 s on "slow network") → confirmed or failed. |
+| `wallet.ts` | Simulated connection (sign-in message, reject path). |
+| `ops.ts` | Every state change: approve, open, repay, add collateral, withdraw, archive, market moves, time skips, and the keeper that liquidates a loan below health 1.00 or past its grace period. |
+| `seed.ts` | The example wallet (Sam Rivera), a past repaid loan, and the "running example" loan. |
 
-## How can I deploy this project?
+Rules the demo enforces:
 
-Simply open [Lovable](https://lovable.dev/projects/390b0e94-1568-4b4b-86bc-124b32f7435a) and click on Share -> Publish.
+- Health factor = collateral value × liquidation threshold ÷ debt. Safe ≥ 1.50, at risk 1.00–1.50, liquidatable < 1.00 (always shown with a word, not colour alone).
+- Collateral: tETH 75% max LTV / 82% liquidation threshold, tWBTC 70% / 78%, tLINK 55% / 65%.
+- Variable APR: 5.40% tUSDC, 5.10% tDAI (+2.00 points in high demand). Fixed = variable + 1.25 points, locked at opening. Borrower levels take 0.25 or 0.50 points off.
+- Interest is simple interest on the outstanding principal, per second; repayments pay interest first.
+- After the due date there is a 3-day grace period; then the loan is liquidated like a price liquidation: the liquidator repays the debt and receives collateral worth the debt plus 5%, and the rest comes back to the borrower.
 
-## Can I connect a custom domain to my Lovable project?
+The **Demo controls** (the "Sepolia testnet" pill beside each app page title) toggle a slow network, force the next transaction to fail, add test stablecoins, and **Reset demo**.
 
-Yes, you can!
+## Project structure
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```
+src/
+  app/
+    [locale]/            en and fr routes: home, how-it-works, credits, pricing (unlinked), app/, app/borrow/, 404, error, OG image
+    globals.css          Monark 2026 tokens (cream / espresso), motion
+    sitemap.ts robots.ts icon.svg
+  proxy.ts               redirects / to the visitor's language
+  components/
+    site/                standard Monark header (brand, Demo chip), footer, locale and theme switches
+    loan/                safety runway, padlock, risk badge (shared by site and app)
+    home/                hero loan card
+    demo/                the interactive app (wizard, dashboard, dialogs, wallet prompt, tx feedback)
+    ui/                  shadcn/ui and @monark registry components (wallet, connect-wallet, token-amount, network-badge, tx-status)
+  i18n/                  typed EN/FR dictionaries
+  lib/demo/              simulated chain, wallet and loan (see above)
+docs/                    site plan, assets, screenshots
+scripts/screenshots.mjs  Playwright visual check
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Deploy to Vercel
+
+Import the repository in Vercel and deploy with the framework defaults (Next.js, `pnpm install`, `pnpm build`). No `vercel.json` and no environment variables are required. Node is pinned to 22.x in `package.json`.
+
+## Stack
+
+Next.js 16 (App Router, TypeScript strict), Tailwind CSS 4, shadcn/ui on the [Monark UI registry](https://ui.monark.io), Lucide icons, Nunito Sans. Branded per the Monark brand guidelines (flat orange, cream and espresso themes, "BorrowX by Monark").
+
+## License and credits
+
+Open source by the Monark community. Photos from Unsplash (see `docs/assets.md` and `/credits`).

@@ -7,7 +7,7 @@ import { notFound } from "next/navigation"
 import { HeroLoanCard } from "@/components/home/hero-loan-card"
 import { RiskBadge } from "@/components/loan/risk-badge"
 import { SafetyRunway } from "@/components/loan/safety-runway"
-import { SectionDivider } from "@/components/site/section-divider"
+import { SectionDivider } from "@/components/ui/section-divider"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { href, isLocale } from "@/i18n/config"
@@ -166,7 +166,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </Accordion>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       {/* Closing */}
       <section aria-labelledby="closing-title" className="mx-auto w-full max-w-6xl px-4 py-16 text-center sm:px-6 lg:py-20">

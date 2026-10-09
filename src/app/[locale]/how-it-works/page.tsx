@@ -6,7 +6,7 @@ import { notFound } from "next/navigation"
 import type { ReactNode } from "react"
 
 import { SafetyRunway } from "@/components/loan/safety-runway"
-import { SectionDivider } from "@/components/site/section-divider"
+import { SectionDivider } from "@/components/ui/section-divider"
 import { Button } from "@/components/ui/button"
 import { href, isLocale, PROJECT_DOC_URL, REPO_URL } from "@/i18n/config"
 import { getDictionary } from "@/i18n"
@@ -227,7 +227,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
         </ul>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       <section aria-labelledby="cta-title" className="mx-auto w-full max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 id="cta-title" className="text-3xl font-extrabold tracking-display">

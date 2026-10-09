@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 
 import { Padlock } from "@/components/loan/padlock"
 import { Button } from "@/components/ui/button"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { TxStatus } from "@/components/ui/tx-status"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
@@ -17,7 +18,6 @@ import { formatToken, formatUsd } from "@/lib/format"
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
 import { LoanActivity } from "./loan-activity"
-import { TxFeedback } from "./tx-feedback"
 
 /**
  * A repaid or liquidated loan: what happened, then take the collateral back
@@ -102,7 +102,19 @@ export function ClosedLoan({ loan, archived = false }: { loan: Loan; archived?: 
                   {t(c.withdraw, { amount: collText })}
                 </Button>
               </div>
-              <TxFeedback state={tx.state} onRetry={() => void withdraw()} onDismiss={tx.reset} />
+              <TxFeedback
+                {...tx.state}
+                signingLabel={app.tx.signing}
+                pendingLabel={app.tx.pending}
+                pendingStatusLabel={app.tx.pending}
+                confirmedLabel={app.tx.confirmed}
+                failedLabel={app.tx.failed}
+                reasons={{ rejected: app.tx.rejected, reverted: app.tx.reverted }}
+                retryLabel={app.tx.retry}
+                dismissLabel={app.tx.dismiss}
+                onRetry={() => void withdraw()}
+                onDismiss={tx.reset}
+              />
             </>
           ) : (
             <p className="inline-flex items-center gap-2 text-sm font-semibold">

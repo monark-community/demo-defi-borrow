@@ -6,8 +6,11 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field-error"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { COLLATERAL_PARAMS, parseAmount } from "@/lib/demo/tokens"
@@ -16,11 +19,9 @@ import { faucet, repay } from "@/lib/demo/ops"
 import { useDemo, useDemoNow } from "@/lib/demo/store"
 import type { Loan } from "@/lib/demo/types"
 import { formatHealth, formatNumber, formatPercent, formatToken } from "@/lib/format"
-import { cn } from "@/lib/utils"
 
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
 
 type Mode = "partial" | "full"
 
@@ -106,39 +107,35 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
           {app.actions.repay}
         </Button>
       </DialogTrigger>
-      <DialogContent closeLabel={app.close} className="sm:max-w-md">
+      <DialogContent closeLabel={app.close}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-extrabold">{r.title}</DialogTitle>
+          <DialogTitle>{r.title}</DialogTitle>
           <DialogDescription>{r.body}</DialogDescription>
         </DialogHeader>
 
-        <div role="radiogroup" aria-label={r.title} className="grid grid-cols-2 gap-1 rounded-full border p-1">
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          aria-label={r.title}
+          value={mode}
+          disabled={busy}
+          onValueChange={(v) => {
+            if (!v) return
+            setMode(v as Mode)
+            tx.reset()
+          }}
+          className="grid w-full grid-cols-2"
+        >
           {(["partial", "full"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="radio"
-              aria-checked={mode === m}
-              disabled={busy}
-              onClick={() => {
-                setMode(m)
-                tx.reset()
-              }}
-              className={cn(
-                "h-10 rounded-full text-sm font-bold transition-colors",
-                mode === m ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
+            <ToggleGroupItem key={m} value={m}>
               {m === "partial" ? r.partial : r.full}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
 
         {mode === "partial" ? (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="repay-amount" className="font-bold">
-              {r.amount}
-            </Label>
+            <Label htmlFor="repay-amount">{r.amount}</Label>
             <div className="relative">
               <Input
                 id="repay-amount"
@@ -176,9 +173,9 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
                 </Button>
               ))}
             </div>
-            <p id="repay-error" role={touched && error ? "alert" : undefined} className="min-h-5 text-sm text-destructive">
-              {touched && error ? error : ""}
-            </p>
+            <FieldError id="repay-error" reserveSpace>
+              {touched && error ? error : null}
+            </FieldError>
           </div>
         ) : (
           <div className="rounded-2xl border bg-muted/40 p-4">
@@ -216,7 +213,19 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
           </div>
         ) : null}
 
-        <TxFeedback state={tx.state} onRetry={() => void submit()} onDismiss={tx.reset} />
+        <TxFeedback
+          {...tx.state}
+          signingLabel={app.tx.signing}
+          pendingLabel={app.tx.pending}
+          pendingStatusLabel={app.tx.pending}
+          confirmedLabel={app.tx.confirmed}
+          failedLabel={app.tx.failed}
+          reasons={{ rejected: app.tx.rejected, reverted: app.tx.reverted }}
+          retryLabel={app.tx.retry}
+          dismissLabel={app.tx.dismiss}
+          onRetry={() => void submit()}
+          onDismiss={tx.reset}
+        />
 
         <div className="flex flex-col gap-3">
           <Button size="lg" onClick={() => void submit()} disabled={busy || lacking}>

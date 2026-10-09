@@ -10,8 +10,15 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  thumbLabel,
+  valueText,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & {
+  /** Accessible name for each thumb; a function receives the thumb index. */
+  thumbLabel?: string | ((index: number) => string)
+  /** Spoken value (`aria-valuetext`), e.g. "45%" or "1,200 USDC". */
+  valueText?: (value: number, index: number) => string
+}) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -30,14 +37,14 @@ function Slider({
       min={min}
       max={max}
       className={cn(
-        "relative flex min-h-8 w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
+        "relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-horizontal:min-h-11 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:min-w-11 data-vertical:flex-col",
         className
       )}
       {...props}
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative grow overflow-hidden rounded-full bg-muted data-horizontal:h-2 data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
+        className="relative grow overflow-hidden rounded-full bg-muted data-horizontal:h-1.5 data-horizontal:w-full data-vertical:h-full data-vertical:w-1.5"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
@@ -48,7 +55,15 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="relative block size-5 shrink-0 rounded-full border-2 border-primary bg-card ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-3 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
+          aria-label={
+            typeof thumbLabel === "function" ? thumbLabel(index) : thumbLabel
+          }
+          aria-valuetext={
+            valueText && _values[index] !== undefined
+              ? valueText(_values[index], index)
+              : undefined
+          }
+          className="relative block size-5 shrink-0 rounded-full border-2 border-primary-ink bg-card ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-3 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
     </SliderPrimitive.Root>

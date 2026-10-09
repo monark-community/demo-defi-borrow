@@ -8,6 +8,7 @@ import { InfoTip } from "@/components/ui/info-tip"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { intlLocale } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { checkTerms, setHighDemand, setPrice, skipDays } from "@/lib/demo/ops"
@@ -94,28 +95,24 @@ export function MarketStrip({ focus }: { focus?: CollateralSymbol }) {
               </p>
               <InfoTip label={app.info}>{m.body}</InfoTip>
             </div>
-            <div role="radiogroup" aria-labelledby="sim-token" className="mt-2 inline-flex rounded-full border p-0.5">
+            <ToggleGroup
+              type="single"
+              variant="pill"
+              size="sm"
+              aria-labelledby="sim-token"
+              value={symbol}
+              onValueChange={(v) => v && setChosen(v as CollateralSymbol)}
+              className="mt-2"
+            >
               {COLLATERALS.map((sym) => (
-                <button
-                  key={sym}
-                  type="button"
-                  role="radio"
-                  aria-checked={sym === symbol}
-                  onClick={() => setChosen(sym)}
-                  className={cn(
-                    "min-h-9 rounded-full px-3.5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                    sym === symbol ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
+                <ToggleGroupItem key={sym} value={sym}>
                   {sym}
-                </button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
 
             <div className="mt-4 flex items-baseline justify-between gap-3">
-              <Label htmlFor="price-slider" className="text-sm font-bold">
-                {t(m.price, { token: symbol })}
-              </Label>
+              <Label htmlFor="price-slider">{t(m.price, { token: symbol })}</Label>
               <output htmlFor="price-slider" className="text-lg font-bold tabular-nums">
                 {formatUsd(price, locale)}
               </output>
@@ -128,8 +125,8 @@ export function MarketStrip({ focus }: { focus?: CollateralSymbol }) {
               step={step}
               value={[price]}
               disabled={busy}
-              aria-label={t(m.price, { token: symbol })}
-              aria-valuetext={formatUsd(price, locale)}
+              thumbLabel={t(m.price, { token: symbol })}
+              valueText={(v) => formatUsd(v, locale)}
               onValueChange={([v]) => {
                 if (v === undefined) return
                 setPrice(symbol, v, false)
@@ -162,9 +159,7 @@ export function MarketStrip({ focus }: { focus?: CollateralSymbol }) {
           <div className="flex flex-col gap-5 md:border-l md:border-dashed md:border-input md:pl-10">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <Label htmlFor="demand" className="text-sm font-bold">
-                  {m.demand}
-                </Label>
+                <Label htmlFor="demand">{m.demand}</Label>
                 <p className="mt-1 text-xs text-muted-foreground">{m.demandHint}</p>
               </div>
               <Switch id="demand" checked={demo.market.highDemand} disabled={busy} onCheckedChange={(v) => setHighDemand(v)} />

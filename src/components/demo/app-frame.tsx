@@ -4,6 +4,7 @@ import { Loader2Icon, WalletIcon, XCircleIcon } from "lucide-react"
 import Image from "next/image"
 import type { ReactNode } from "react"
 
+import { AppLoading } from "@/components/ui/app-loading"
 import { Button } from "@/components/ui/button"
 import { useDemo, useStorageOk } from "@/lib/demo/store"
 import { connectWallet } from "@/lib/demo/wallet"
@@ -31,22 +32,6 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 lg:py-10">
         {!demo ? <AppLoading label={app.loading} /> : demo.wallet.status !== "connected" ? <ConnectGate /> : children}
       </div>
-    </div>
-  )
-}
-
-export function AppLoading({ label }: { label: string }) {
-  return (
-    <div role="status" aria-live="polite" className="flex flex-col gap-4">
-      <span className="sr-only">{label}</span>
-      <div className="h-9 w-56 animate-pulse rounded-full bg-muted" />
-      <div className="grid gap-3 sm:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
-        ))}
-      </div>
-      <div className="h-40 animate-pulse rounded-2xl bg-muted" />
-      <div className="h-40 animate-pulse rounded-2xl bg-muted" />
     </div>
   )
 }

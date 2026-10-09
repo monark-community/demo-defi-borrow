@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { COLLATERAL_PARAMS, parseAmount } from "@/lib/demo/tokens"
@@ -20,7 +21,6 @@ import { cn } from "@/lib/utils"
 
 import { Amount } from "./amount"
 import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
 
 type Mode = "partial" | "full"
 
@@ -216,7 +216,19 @@ export function RepayDialog({ loan, disabled }: { loan: Loan; disabled?: boolean
           </div>
         ) : null}
 
-        <TxFeedback state={tx.state} onRetry={() => void submit()} onDismiss={tx.reset} />
+        <TxFeedback
+          {...tx.state}
+          signingLabel={app.tx.signing}
+          pendingLabel={app.tx.pending}
+          pendingStatusLabel={app.tx.pending}
+          confirmedLabel={app.tx.confirmed}
+          failedLabel={app.tx.failed}
+          reasons={{ rejected: app.tx.rejected, reverted: app.tx.reverted }}
+          retryLabel={app.tx.retry}
+          dismissLabel={app.tx.dismiss}
+          onRetry={() => void submit()}
+          onDismiss={tx.reset}
+        />
 
         <div className="flex flex-col gap-3">
           <Button size="lg" onClick={() => void submit()} disabled={busy || lacking}>

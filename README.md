@@ -21,7 +21,7 @@ It is a testnet reference implementation for Monark's community of students, dev
 
 ## Run it locally
 
-Requirements: Node 22 and pnpm 10.
+Requirements: Node 24 and pnpm 10.
 
 ```bash
 pnpm install

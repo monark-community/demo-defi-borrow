@@ -1,9 +1,8 @@
 "use client"
 
-import { useTheme } from "next-themes"
 import { createContext, useContext, useEffect, type ReactNode } from "react"
-import { Toaster } from "sonner"
 
+import { Toaster } from "@/components/ui/sonner"
 import type { Dictionary } from "@/i18n"
 import type { Locale } from "@/i18n/config"
 import { checkTerms } from "@/lib/demo/ops"
@@ -28,7 +27,6 @@ export function useAppCopy(): AppCopy {
 }
 
 export function AppProvider({ value, children }: { value: AppCopy; children: ReactNode }) {
-  const { resolvedTheme } = useTheme()
   useEffect(() => {
     initDemo()
     // Resume any automatic enforcement that was due while the page was closed.
@@ -40,7 +38,6 @@ export function AppProvider({ value, children }: { value: AppCopy; children: Rea
       {children}
       <WalletPrompt />
       <Toaster
-        theme={resolvedTheme === "dark" ? "dark" : "light"}
         // Top-right, below the sticky header: page titles are left-aligned, so
         // that corner never holds the loan figures a toast reports on. On
         // phones sonner goes full width below the header, above the page
@@ -48,12 +45,6 @@ export function AppProvider({ value, children }: { value: AppCopy; children: Rea
         position="top-right"
         offset={{ top: 80, right: 24 }}
         mobileOffset={{ top: 72, left: 16, right: 16 }}
-        toastOptions={{
-          classNames: {
-            toast: "!rounded-2xl !border !border-border !bg-popover !text-popover-foreground !font-sans !shadow-md",
-            description: "!text-muted-foreground",
-          },
-        }}
       />
     </AppContext.Provider>
   )

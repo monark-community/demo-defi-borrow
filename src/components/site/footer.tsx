@@ -31,7 +31,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
       LinkComponent={Link}
       labels={{ productNav: f.productNav, builtBy: f.builtBy, monarkHome: f.monarkHome, tagline: f.tagline, socials: f.socialLabel }}
     >
-      <nav aria-label={f.family} className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+      <nav aria-label={f.family} className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm md:justify-end">
         <span className="text-muted-foreground">{f.family}</span>
         <ul className="flex flex-wrap gap-x-4 gap-y-1">
           {SIBLINGS.map((s) => (

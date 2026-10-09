@@ -1,17 +1,20 @@
 "use client"
 
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, PenLineIcon, RotateCcwIcon, SparklesIcon, XCircleIcon } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, PenLineIcon, RotateCcwIcon, SparklesIcon } from "lucide-react"
 import Link from "next/link"
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 
 import { Padlock } from "@/components/loan/padlock"
 import { RiskBadge } from "@/components/loan/risk-badge"
 import { SafetyRunway } from "@/components/loan/safety-runway"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FieldError } from "@/components/ui/field-error"
 import { InfoTip } from "@/components/ui/info-tip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
@@ -226,14 +229,14 @@ export function BorrowWizard() {
                     {b.need.body}
                   </InfoTip>
                 </legend>
-                <div role="radiogroup" aria-label={b.need.asset} className="mt-2 grid grid-cols-2 gap-2">
+                <RadioGroup variant="card" aria-label={b.need.asset} value={borrowSymbol} onValueChange={(v) => setBorrowSymbol(v as LoanSymbol)} className="mt-2 grid-cols-2">
                   {LOAN_TOKENS.map((sym) => (
-                    <Choice key={sym} checked={borrowSymbol === sym} onSelect={() => setBorrowSymbol(sym)}>
+                    <RadioGroupItem key={sym} value={sym}>
                       <span className="text-base font-extrabold">{sym}</span>
                       <span className="text-xs text-muted-foreground">{formatApr(quoteApr(sym, "variable", demo.market, discount), locale)} · {terms.variable}</span>
-                    </Choice>
+                    </RadioGroupItem>
                   ))}
-                </div>
+                </RadioGroup>
               </fieldset>
               <AmountField
                 id="borrow-amount"
@@ -265,11 +268,11 @@ export function BorrowWizard() {
                     {b.lock.body}
                   </InfoTip>
                 </legend>
-                <div role="radiogroup" aria-label={b.lock.asset} className="mt-2 grid gap-2 sm:grid-cols-3">
+                <RadioGroup variant="card" aria-label={b.lock.asset} value={collateralSymbol} onValueChange={(v) => setCollateralSymbol(v as CollateralSymbol)} className="mt-2 sm:grid-cols-3">
                   {COLLATERALS.map((sym) => {
                     const p = COLLATERAL_PARAMS[sym]
                     return (
-                      <Choice key={sym} checked={collateralSymbol === sym} onSelect={() => setCollateralSymbol(sym)}>
+                      <RadioGroupItem key={sym} value={sym}>
                         <span className="text-base font-extrabold">{sym}</span>
                         <span className="text-xs text-muted-foreground">
                           {t(b.lock.balance, { amount: formatToken(demo.wallet.balances[sym], sym, locale) })}
@@ -277,10 +280,10 @@ export function BorrowWizard() {
                         <span className="text-xs text-muted-foreground">
                           {t(b.lock.limit, { pct: formatPercent(p.maxLtv + levelLtvBonus(level), locale) })}
                         </span>
-                      </Choice>
+                      </RadioGroupItem>
                     )
                   })}
-                </div>
+                </RadioGroup>
               </fieldset>
               <AmountField
                 id="collateral-amount"
@@ -315,28 +318,28 @@ export function BorrowWizard() {
               </h2>
               <fieldset className="mt-6">
                 <legend className="text-sm font-bold">{b.terms.term}</legend>
-                <div role="radiogroup" aria-label={b.terms.term} className="mt-2 grid grid-cols-3 gap-2">
+                <RadioGroup variant="card" aria-label={b.terms.term} value={String(termDays)} onValueChange={(v) => setTermDays(Number(v) as TermDays)} className="mt-2 grid-cols-3">
                   {TERMS.map((d) => (
-                    <Choice key={d} checked={termDays === d} onSelect={() => setTermDays(d)} center>
+                    <RadioGroupItem key={d} value={String(d)} className="items-center">
                       <span className="text-base font-extrabold">{t(terms.days, { n: d })}</span>
-                    </Choice>
+                    </RadioGroupItem>
                   ))}
-                </div>
+                </RadioGroup>
                 <p className="mt-2 text-xs text-muted-foreground">{t(b.terms.termHint, { date: formatDate(dueAt, locale) })}</p>
               </fieldset>
               <fieldset className="mt-6">
                 <legend className="text-sm font-bold">{b.terms.rate}</legend>
-                <div role="radiogroup" aria-label={b.terms.rate} className="mt-2 grid gap-2 sm:grid-cols-2">
+                <RadioGroup variant="card" aria-label={b.terms.rate} value={rateKind} onValueChange={(v) => setRateKind(v as RateKind)} className="mt-2 sm:grid-cols-2">
                   {(["variable", "fixed"] as const).map((k) => (
-                    <Choice key={k} checked={rateKind === k} onSelect={() => setRateKind(k)}>
+                    <RadioGroupItem key={k} value={k}>
                       <span className="flex items-baseline justify-between gap-2">
                         <span className="text-base font-extrabold">{k === "fixed" ? terms.fixed : terms.variable}</span>
                         <span className="tabular-nums text-sm font-bold">{formatApr(quoteApr(borrowSymbol, k, demo.market, discount), locale)}</span>
                       </span>
                       <span className="text-xs text-muted-foreground">{k === "fixed" ? b.terms.fixedHint : b.terms.variableHint}</span>
-                    </Choice>
+                    </RadioGroupItem>
                   ))}
-                </div>
+                </RadioGroup>
                 {discount > 0 ? (
                   <p className="mt-2 text-xs text-muted-foreground">
                     {t(b.terms.discount, { level: app.level.names[level], pts: formatNumber(discount, locale, 2, 2) })}
@@ -412,13 +415,13 @@ export function BorrowWizard() {
                     </div>
                   ) : null}
                   {failed ? (
-                    <div role="alert" className="mt-4 flex items-start gap-2 rounded-2xl border border-destructive/40 bg-destructive/5 p-3.5 text-sm">
-                      <XCircleIcon className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
-                      <span>
-                        <span className="font-bold text-destructive">{app.tx.failed}. </span>
-                        {failed.error === "rejected" ? app.tx.rejected : app.tx.reverted}
-                      </span>
-                    </div>
+                    <TxFeedback
+                      phase="failed"
+                      error={failed.error}
+                      failedLabel={app.tx.failed}
+                      reasons={{ rejected: app.tx.rejected, reverted: app.tx.reverted }}
+                      className="mt-4"
+                    />
                   ) : null}
                   <div className="mt-6 flex flex-col gap-3">
                     <Button size="lg" onClick={() => void sign()} disabled={busy} className="sm:self-start">
@@ -488,24 +491,6 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
   )
 }
 
-function Choice({ checked, onSelect, children, center }: { checked: boolean; onSelect: () => void; children: ReactNode; center?: boolean }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={checked}
-      onClick={onSelect}
-      className={cn(
-        "flex min-h-14 flex-col gap-0.5 rounded-2xl border-2 px-4 py-3 text-left transition-colors duration-150",
-        center && "items-center justify-center text-center",
-        checked ? "border-primary bg-primary/5" : "border-border hover:border-input"
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
 function AmountField({
   id,
   label,
@@ -525,9 +510,7 @@ function AmountField({
 }) {
   return (
     <div className="mt-6 flex flex-col gap-2">
-      <Label htmlFor={id} className="font-bold">
-        {label}
-      </Label>
+      <Label htmlFor={id}>{label}</Label>
       <div className="relative">
         <Input
           id={id}
@@ -546,9 +529,9 @@ function AmountField({
           {hint}
         </p>
       ) : null}
-      <p id={`${id}-error`} role={error ? "alert" : undefined} className="min-h-5 text-sm text-destructive">
-        {error ?? ""}
-      </p>
+      <FieldError id={`${id}-error`} reserveSpace>
+        {error}
+      </FieldError>
     </div>
   )
 }

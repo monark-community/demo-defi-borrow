@@ -1,13 +1,15 @@
 "use client"
 
-import { LockIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
+import { LockIcon, RotateCcwIcon } from "lucide-react"
 import { useState, type ReactNode } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field-error"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { healthFactor, liquidationPrice, positionOf, rescueOptions } from "@/lib/demo/loan-math"
@@ -106,16 +108,14 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
           {app.actions.add}
         </Button>
       </DialogTrigger>
-      <DialogContent closeLabel={app.close} className="sm:max-w-md">
+      <DialogContent closeLabel={app.close}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-extrabold">{a.title}</DialogTitle>
+          <DialogTitle>{a.title}</DialogTitle>
           <DialogDescription>{a.body}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="add-amount" className="font-bold">
-            {a.amount}
-          </Label>
+          <Label htmlFor="add-amount">{a.amount}</Label>
           <div className="relative">
             <Input
               id="add-amount"
@@ -149,9 +149,9 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
               {t(a.suggested, { amount: formatToken(rescue, sym, locale) })}
             </Button>
           ) : null}
-          <p id="add-error" role={touched && error ? "alert" : undefined} className="min-h-5 text-sm text-destructive">
-            {touched && error ? error : ""}
-          </p>
+          <FieldError id="add-error" reserveSpace>
+            {touched && error ? error : null}
+          </FieldError>
         </div>
 
         {!error ? (
@@ -181,13 +181,12 @@ export function AddCollateralDialog({ loan, disabled }: { loan: Loan; disabled?:
         ) : null}
 
         {failed ? (
-          <div role="alert" className="flex items-start gap-2 rounded-2xl border border-destructive/40 bg-destructive/5 p-3.5 text-sm">
-            <XCircleIcon className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
-            <span>
-              <span className="font-bold text-destructive">{app.tx.failed}. </span>
-              {failed.error === "rejected" ? app.tx.rejected : app.tx.reverted}
-            </span>
-          </div>
+          <TxFeedback
+            phase="failed"
+            error={failed.error}
+            failedLabel={app.tx.failed}
+            reasons={{ rejected: app.tx.rejected, reverted: app.tx.reverted }}
+          />
         ) : null}
 
         <div className="flex flex-col gap-3">

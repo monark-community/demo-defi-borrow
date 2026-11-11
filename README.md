@@ -21,7 +21,7 @@ It is a testnet reference implementation for Monark's community of students, dev
 
 ## Run it locally
 
-Requirements: Node 22 and pnpm 10.
+Requirements: Node 22.23.4 or newer on the 22 line and pnpm 10.
 
 ```bash
 pnpm install
@@ -91,7 +91,7 @@ scripts/screenshots.mjs  Playwright visual check
 
 ## Deploy to Vercel
 
-Import the repository in Vercel and deploy with the framework defaults (Next.js, `pnpm install`, `pnpm build`). No `vercel.json` and no environment variables are required. Node is pinned to 22.x in `package.json`.
+Import the repository in Vercel and deploy with the framework defaults (Next.js, `pnpm install`, `pnpm build`). No `vercel.json` and no environment variables are required. Node is pinned to 22.x in `package.json`. `pnpm build` and `pnpm start` stop on a Node release exposed to CVE-2026-111497.
 
 ## Stack
 
